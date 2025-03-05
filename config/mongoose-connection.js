@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
+const config = require("config");
+const dbgr = require('debug')("development:mongoose");
+
 
 mongoose
-.connect("mongodb+srv://ds3590778:xe9tpvTVbna5kCKB@cluster0.rpa7d.mongodb.net/NEXON?retryWrites=true&w=majority&appName=Cluster0")
+.connect(`${config.get("MONGODB_URI")}`)
 .then(function(){
-    console.log("Connected to database")
+    dbgr("Connected to database")
 })
 .catch(function(err){
     console.log(err);
