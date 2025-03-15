@@ -18,7 +18,7 @@
     }
 
     .users-section {
-      width: 65%;
+      width: 100%;
       background-color: #fff;
       padding: 30px;
       border-radius: 8px;
@@ -110,13 +110,12 @@
     </div>
     <% } %>
 
-
-  <% if(cart.length === 0 ){ %>
-    <h1 style="font-size: xx-large;"><b>No items in cart Yet</b></h1>
+  <% if(orders.length === 0 ){ %>
+    <h1 style="font-size: xx-large;"><b>No Orders Yet</b></h1>
   <% } else { %>
   <main>
     <div class="users-section">
-      <h1>Cart</h1>
+      <h1 ><b>Orders</b></h1><br>
       <div class="users-table">
         <table>
           <thead>
@@ -126,11 +125,12 @@
               <th>Price</th>
               <th>Quantity</th>
               <th>Date</th>
+              <th>Order Status</th>
               <th>Options</th>
             </tr>
           </thead>
           <tbody>
-            <% cart.forEach(function(product){ %>
+            <% orders.forEach(function(product){ %>
               <tr>
                 <td>
                   <img src="data:image/jpeg;base64,<%= product.productid.image.toString('base64') %>" alt="Product Image">
@@ -139,18 +139,15 @@
                 <td>₹ <%= product.productid.price %></td>
                 <td><%= product.quantity %></td>
                 <td><%= new Date(product.date).toLocaleString('en-IN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) %></td>
+                <td><%= product.orderStatus %></td>
                 <td>
-                  <form action="/addquantity/<%= product._id %>" >
+                  <form action="/removeorder/<%= product._id %>" >
                     <input type="hidden" name="productId" value="<%= product.productid._id %>">
-                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-md">Add Quantity</button>
+                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-md">Cancel Order</button>
                   </form><br>
-                  <form action="/reducequantity/<%= product._id %>" >
+                  <form action="/reorder/<%= product._id %>" >
                     <input type="hidden" name="productId" value="<%= product.productid._id %>">
-                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-md">Reduce Quantity</button>
-                  </form><br>
-                  <form action="/removeitem/<%= product.productid._id %>" >
-                    <input type="hidden" name="productId" value="<%= product.productid._id %>">
-                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-md">Remove Product</button>
+                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-md">Re-Order</button>
                   </form>
                 </td>
               </tr>
@@ -158,45 +155,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-    <% let total = 0; %>
-    <% let totaldiscount = 0; %>
-
-    <% cart.forEach(function(product){ %>
-        <% 
-            let sum = Number(product.productid.price) * Number(product.quantity); 
-            let discountSum = Number(product.productid.discount) * Number(product.quantity);
-            total += sum;
-            totaldiscount += discountSum;
-          %>
-    <% }); %> 
-    <div class="price-breakdown">
-      <h3 class="text-xl font-bold">Price Breakdown</h3>
-      <table>
-        <tr>
-          <th>Total MRP</th>
-          <td>₹ <%= total %></td>
-        </tr>
-        <tr>
-          <th>Discount on MRP</th>
-          <td>₹ <%= totaldiscount %></td>
-        </tr>
-        <tr>
-          <th>Platform Fee</th>
-          <td>₹ 20</td>
-        </tr>
-        <tr>
-          <th>Shipping Fee</th>
-          <td>FREE</td>
-        </tr>
-        <tr>
-          <th>Total Amount</th>
-          <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 20 %></td>
-        </tr>
-      </table>
-      <form action="/addtoorders" method="post">
-        <button class="w-full text-xl bg-blue-500 rounded-md mt-4 p-2 text-white">Place Order</button>
-      </form>
     </div>
   </main>
   <% } %>
