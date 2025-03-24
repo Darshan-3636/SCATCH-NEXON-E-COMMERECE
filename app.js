@@ -11,11 +11,16 @@ const usersRouter = require('./routes/usersRouter');
 const indexRouter = require('./routes/index');
 const MongoStore = require("connect-mongo");
 
+const cors = require('cors');
 
 const flash = require('connect-flash');
 const expressSession = require("express-session");
 
 require('dotenv').config();
+
+
+app.use(cors());
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
