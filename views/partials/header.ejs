@@ -9,22 +9,25 @@
 </head>
 <body class="font-['helvetica_now_display']">
   
-    <% var loggedin = typeof loggedin !== "undefined" ? loggedin:true %>
-    <% if(loggedin){ %>
         <!-- Navbar -->
   <nav class="w-full fixed top-0 left-0 px-5 py-5 flex justify-between items-center border-b-2 border-gray-300 bg-white/60 backdrop-blur-md">
     <!-- Left side (Brand Name) -->
     <h3 class="text-xl font-bold">NEXON</h3>
           <!-- Center: Search Bar -->
     <div class="flex-1 mx-10">
-        <form class="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            class="w-full border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:outline-none bg-white/70"
-          />
+      <form class="relative" action="/shop" method="GET">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search"
+          value="<%= query || '' %>"
+          class="w-full border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:outline-none bg-white/70"
+        />
+        <button type="submit">
           <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-        </form>
+        </button>
+      </form>
+      
       </div>
       
       <!-- Right side (Navigation Links) -->
@@ -33,8 +36,8 @@
         <a href="/orders" class="hover:underline">orders</a>
         <a href="/cart" class="hover:underline">Cart</a>
         <a href="#" class="hover:underline">My account</a>
+        <a href="/login" class="hover:underline">Login</a>
         <a href="/logout" class="text-red-600 hover:underline">Logout</a>
       </div>
     </nav>
     <br>
-    <% }%>

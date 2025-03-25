@@ -12,17 +12,37 @@ const sha256 = require('sha256')
 
 
 router.get("/", function (req, res) {
-  let error = req.flash("error");
-  let success = req.flash("success");
-  res.render("index", { error, success, loggedin: false });
+  res.redirect('/shop');
 });
 
-router.get("/shop", isLoggedIn, async (req, res) => {
+router.get("/login", function (req, res) {
   let error = req.flash("error");
   let success = req.flash("success");
-  let products = await productModel.find();
-  res.render("shop", { products, error, success });
+  res.render("index", { error, success });
 });
+
+router.get("/shop", async (req, res) => {
+  let error = req.flash("error");
+  let success = req.flash("success");
+
+  let query = req.query.q ? req.query.q.trim() : "";
+  let products;
+
+  if (query) {
+    // Case-insensitive search in product name and description
+    products = await productModel.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } }, 
+        { description: { $regex: query, $options: "i" } }
+      ]
+    });
+  } else {
+    products = await productModel.find();
+  }
+
+  res.render("shop", { products, error, success, query });
+});
+
 
 router.get("/cart", isLoggedIn, async (req, res) => {
   let error = req.flash("error");
@@ -38,19 +58,22 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
     let { pid } = req.params;
     let userid = req.user._id;
 
-    let cartItem = await cartModel.findOne({ userid, productid: pid });
-
+    let cartItem = await cartModel.findOne({ userid, productid: pid }).populate('productid');
     if (cartItem) {
       cartItem.quantity += 1;
+      let totalAmount = (cartItem.productid.price * cartItem.quantity) - (cartItem.productid.discount * cartItem.quantity);
+      cartItem.totalAmount = totalAmount
       await cartItem.save();
     } else {
-      await cartModel.create({ userid, productid: pid, quantity: 1 });
+      let product = await productModel.findOne({_id:pid})
+      let totalAmount = product.price - product.discount
+      await cartModel.create({ userid, productid: pid, quantity: 1 ,totalAmount});
     }
     req.flash("success", "Product added to your cart!");
     res.redirect("/shop");
   } catch (error) {
     console.error(error);
-    req.flash("error", "Something went wrong");
+    req.flash("error", error.message);
     res.redirect("/shop");
   }
 });
@@ -81,6 +104,7 @@ router.post("/addtoorders", isLoggedIn, async (req, res) => {
       userid: item.userid,
       productid: item.productid,
       quantity: item.quantity,
+      totalAmount:item.totalAmount
     }));
 
     // Insert all orders in bulk

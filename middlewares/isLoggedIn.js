@@ -5,7 +5,7 @@ const userModel = require('../models/user-model')
 module.exports = async (req, res, next)=>{
     if(!req.cookies.token){
         req.flash("error","you need to login first");
-        return res.redirect('/');
+        return res.redirect('/login');
     }
     else{
         try{
@@ -15,7 +15,7 @@ module.exports = async (req, res, next)=>{
             next();
         } catch (err){
             req.flash('error', "Something Went Wrong");
-            res.redirect('/');
+            res.redirect('/login');
         }
     }
 }
