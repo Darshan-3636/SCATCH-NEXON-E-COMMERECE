@@ -9,6 +9,7 @@ const orderModel = require("../models/order-model");
 const axios = require("axios");
 const uniqid = require("uniqid");
 const sha256 = require('sha256')
+
 const { 
   getAccountDetails, 
   getUpdateAccount,
@@ -277,57 +278,42 @@ router.get("/removeitem/:pid", isLoggedIn, async (req, res) => {
 router.get("/logout", logout);
 
 
-//payment gatway
-
-const MERCHANT_ID = 'PGTESTPAYUAT86';
-const PHONE_PE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
-const SALT_INDEX = 1;
-const SALT_KEY = '96434309-7796-489d-8924-ab56988a6076';
-const APP_BE_URL = "http://localhost:4000"; // our application
 
 
-// endpoint to initiate a payment
-router.post("/pay/:amount", isLoggedIn,async function (req, res, next) {
-  // Initiate a payment
+const MERCHANT_ID = "M22WHG5I5GU1U"; // Your Merchant ID
+const PHONE_PE_HOST_URL = "https://api.phonepe.com/apis/hermes"; // ✅ Production URL
+const SALT_INDEX = 1; // Salt Index
+const SALT_KEY = "6dd1a0fb-51ea-4312-9f6b-09d0415f42d0"; // Secret Key
+const APP_BE_URL = "http://localhost:4000"; // ✅ Your production backend URL
 
-  // Transaction amount
-  const amount = req.params.amount;
+// Initiate a payment
+router.post("/pay/:amount", isLoggedIn, async (req, res) => {
+  try {
+    // const amount = req.params.amount * 100; // Convert to paise
+    const userId = req.user.email;
+    const merchantTransactionId = uniqid();
 
-  // User ID is the ID of the user present in our application DB
-  let userId = `${req.user.email}`;
+    const normalPayLoad = {
+      merchantId: MERCHANT_ID,
+      merchantTransactionId,
+      merchantUserId: userId,
+      amount:100,
+      redirectUrl: `${APP_BE_URL}/payment/validate/${merchantTransactionId}`,
+      redirectMode: "REDIRECT",
+      mobileNumber: req.user.contact,
+      paymentInstrument: { type: "PAY_PAGE" },
+    };
 
-  // Generate a unique merchant transaction ID for each transaction
-  let merchantTransactionId = uniqid();
+    // Encode payload
+    const base64EncodedPayload = Buffer.from(JSON.stringify(normalPayLoad), "utf8").toString("base64");
 
-  // redirect url => phonePe will redirect the user to this url once payment is completed. It will be a GET request, since redirectMode is "REDIRECT"
-  let normalPayLoad = {
-    merchantId: MERCHANT_ID, //* PHONEPE_MERCHANT_ID . Unique for each account (private)
-    merchantTransactionId: merchantTransactionId,
-    merchantUserId: userId,
-    amount: amount * 100, // converting to paise
-    redirectUrl: `${APP_BE_URL}/payment/validate/${merchantTransactionId}`,
-    redirectMode: "REDIRECT",
-    mobileNumber: "9999999999",
-    paymentInstrument: {
-      type: "PAY_PAGE",
-    },
-  };
+    // Generate X-VERIFY signature
+    const string = base64EncodedPayload + "/pg/v1/pay" + SALT_KEY;
+    const xVerifyChecksum = sha256(string) + "###" + SALT_INDEX;
 
-  // make base64 encoded payload
-  let bufferObj = Buffer.from(JSON.stringify(normalPayLoad), "utf8");
-  let base64EncodedPayload = bufferObj.toString("base64");
-
-  // X-VERIFY => SHA256(base64EncodedPayload + "/pg/v1/pay" + SALT_KEY) + ### + SALT_INDEX
-  let string = base64EncodedPayload + "/pg/v1/pay" + SALT_KEY;
-  let sha256_val = sha256(string);
-  let xVerifyChecksum = sha256_val + "###" + SALT_INDEX;
-
-  axios
-    .post(
+    const response = await axios.post(
       `${PHONE_PE_HOST_URL}/pg/v1/pay`,
-      {
-        request: base64EncodedPayload,
-      },
+      { request: base64EncodedPayload },
       {
         headers: {
           "Content-Type": "application/json",
@@ -335,63 +321,77 @@ router.post("/pay/:amount", isLoggedIn,async function (req, res, next) {
           accept: "application/json",
         },
       }
-    )
-    .then(function (response) {
+    );
+
+    if (response.data.success) {
       res.redirect(response.data.data.instrumentResponse.redirectInfo.url);
-    })
-    
-    .catch(function (error) {
-      res.send(error);
-    });
+    } else {
+      throw new Error(response.data.message || "Payment initiation failed");
+    }
+  } catch (error) {
+    console.error("Payment error:", error);
+    req.flash("error", "Something went wrong while initiating payment.");
+    res.redirect("/cart");
+  }
 });
 
-// endpoint to check the status of payment
-router.get("/payment/validate/:merchantTransactionId", async function (req, res) {
-  const { merchantTransactionId } = req.params;
-  // check the status of the payment using merchantTransactionId
-  if (merchantTransactionId) {
-    let statusUrl =
-      `${PHONE_PE_HOST_URL}/pg/v1/status/${MERCHANT_ID}/` +
-      merchantTransactionId;
+router.post("/webhook/payment-status", async (req, res) => {
+  try {
+      const data = req.body; // PhonePe's response data
+      console.log("Received webhook data:", data);
 
-    // generate X-VERIFY
-    let string =
-      `/pg/v1/status/${MERCHANT_ID}/` + merchantTransactionId + SALT_KEY;
-    let sha256_val = sha256(string);
-    let xVerifyChecksum = sha256_val + "###" + SALT_INDEX;
+      // Validate request using X-VERIFY (optional for security)
+      
+      // Process the payment status
+      if (data.code === "PAYMENT_SUCCESS") {
+          // Update order status in your database
+          return res.send('payment successfull')
+      } else {
+          return res.send('payment failed')
+      }
 
-    axios
-      .get(statusUrl, {
-        headers: {
-          "Content-Type": "application/json",
-          "X-VERIFY": xVerifyChecksum,
-          "X-MERCHANT-ID": merchantTransactionId,
-          accept: "application/json",
-        },
-      })
-      .then(function (response) {
-        if (response.data && response.data.code === "PAYMENT_SUCCESS") {
-          // redirect to FE payment success status page
-          res.send(`
-            <form action="/addtoorders" method="POST">
-              <input type="hidden" name="key" value="value">
-            </form>
-            <script>
-              document.forms[0].submit();
-            </script>
-          `);
-          
-        } else {
-          req.flash('error','payment failed')
-        }
-      })
-      .catch(function (error) {
-        req.flash('error',`${error.data}`);
-        res.redirect('/cart')
-      });
-  } else {
-    req.flash('error',`Somthing Went Wrong`);
-    res.redirect('/cart')
+      // Send success response to PhonePe
+      res.status(200).send("Webhook received successfully");
+  } catch (error) {
+      console.error("Webhook error:", error);
+      res.status(500).send("Error processing webhook");
+  }
+});
+
+
+// Validate Payment Status
+router.get("/payment/validate/:merchantTransactionId", async (req, res) => {
+  try {
+    const { merchantTransactionId } = req.params;
+    const statusUrl = `${PHONE_PE_HOST_URL}/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}`;
+
+    const xVerifyString = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}${SALT_KEY}`;
+    const xVerifyChecksum = sha256(xVerifyString) + "###" + SALT_INDEX;
+
+    const response = await axios.get(statusUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-VERIFY": xVerifyChecksum,
+        "X-MERCHANT-ID": MERCHANT_ID,
+        accept: "application/json",
+      },
+    });
+
+    if (response.data.code === "PAYMENT_SUCCESS") {
+      res.send(`
+        <form action="/addtoorders" method="POST">
+          <input type="hidden" name="key" value="value">
+        </form>
+        <script>document.forms[0].submit();</script>
+      `);
+    } else {
+      req.flash("error", "Payment failed. Please try again.");
+      res.redirect("/cart");
+    }
+  } catch (error) {
+    console.error("Validation error:", error);
+    req.flash("error", "Something went wrong while validating payment.");
+    res.redirect("/cart");
   }
 });
 
