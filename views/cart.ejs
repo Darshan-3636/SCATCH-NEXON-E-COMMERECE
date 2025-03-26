@@ -7,7 +7,18 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    .brand, a{
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
+    }
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
+    }
     main {
+      
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       flex: 1;
       padding: 20px;
       background-color: #f4f7fa;
@@ -18,6 +29,8 @@
     }
 
     .users-section {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       width: 65%;
       background-color: #fff;
       padding: 30px;
@@ -28,6 +41,8 @@
     }
 
     .price-breakdown {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       width: 30%;
       background-color: #fff;
       padding: 30px;
@@ -36,11 +51,15 @@
     }
 
     .users-table table, .price-breakdown table {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       width: 100%;
       border-collapse: collapse;
     }
 
     .users-table th, .users-table td, .price-breakdown th, .price-breakdown td {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       padding: 12px;
       text-align: left;
       font-size: 14px;
@@ -49,11 +68,15 @@
     }
 
     .users-table th, .price-breakdown th {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       background-color: #f5f5f5;
       font-weight: bold;
     }
 
     .users-table img {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
       max-height: 120px;
       max-width: 100%;
       object-fit: contain;
@@ -68,7 +91,7 @@
         <!-- Navbar -->
   <nav class="w-full fixed top-0 left-0 px-5 py-5 flex justify-between items-center border-b-2 border-gray-300 bg-white/60 backdrop-blur-md">
     <!-- Left side (Brand Name) -->
-    <h3 class="text-xl font-bold">NEXON</h3>
+    <h3 class="brand">NEXON</h3>
           <!-- Center: Search Bar -->
     <div class="flex-1 mx-10">
         <form class="relative">
@@ -86,7 +109,7 @@
         <a href="/shop" class="hover:underline">Home</a>
         <a href="/orders" class="hover:underline">orders</a>
         <a href="/cart" class="hover:underline">Cart</a>
-        <a href="#" class="hover:underline">My account</a>
+        <a href="/account" class="hover:underline">My account</a>
         <a href="/logout" class="text-red-600 hover:underline">Logout</a>
       </div>
     </nav>
@@ -194,7 +217,7 @@
           <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 20 %></td>
         </tr>
       </table>
-      <form action="/addtoorders" method="post">
+      <form action="/pay/<%= total - totaldiscount + 20 %>" method="post">
         <button class="w-full text-xl bg-blue-500 rounded-md mt-4 p-2 text-white">Place Order</button>
       </form>
     </div>

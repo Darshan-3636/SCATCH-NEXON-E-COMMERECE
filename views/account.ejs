@@ -6,6 +6,9 @@
     <title>My Account Details</title>
     
     <style>
+        a {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+  }
         .container {
             max-width: 600px;
             margin: 20px auto;
@@ -79,28 +82,7 @@
     </nav>
     <br>
     <% }%>
-    <div class="w-full h-screen flex items-start px-20 py-20">
-        <div class="w-[25%] flex h-screen flex-col items-start">
-            <div class="flex items-center gap-2">
-                <h3>sort by</h3>
-                <form action="/shop">
-                    <select class="border-[1px] px-2 py-1" name="sortby" id="">
-                        <option value="popular">Popular</option>
-                        <option value="newest">Newest</option>
-                    </select>
-                </form>
-            </div>
-            <div class="flex flex-col mt-20">
-                <a class="block w-fit mb-2" href="">New Collection</a>
-                <a class="block w-fit mb-2" href="">All Products</a>
-                <a class="block w-fit mb-2" href="">Discounted Products</a>
-            </div>
-            <div class="mt-32">
-                <a class="block w-fit mb-2" href="">Filter by :</a>
-                <a class="block w-fit mb-2" href="">Availability</a>
-                <a class="block w-fit mb-2" href="">Discount</a>
-            </div>
-        </div>
+    
     
     <div class="container">
         <h1>My Account Details</h1>

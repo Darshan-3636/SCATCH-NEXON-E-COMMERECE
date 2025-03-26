@@ -1,59 +1,319 @@
-<%- include('./partials/header') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Apply Global Font */
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
+    }
 
-<% if(error.length>0){ %>
-    <div class="absolute top-5 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 rounded-md bg-red-500 flash-message">
-        <span class="inline-block mt-1 mb-1 text-white">
-            <%= error %>
-        </span>
-    </div>
+    /* Main Container */
+    .container {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #fff;
+      left:2px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar h3 {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .sidebar a {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      display: block;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #333;
+      transition: background-color 0.2s ease;
+    }
+
+    .sidebar a:hover {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f3f4f6;
+      color: #4f46e5;
+    }
+
+    /* Sort Dropdown */
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      outline: none;
+      transition: border-color 0.2s ease-in-out;
+    }
+
+    select:focus {
+      border-color: #4f46e5;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    /* Product Card */
+    .product-card {
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f3f4f6;
+    }
+
+    .product-image img {
+      max-height: 180px;
+      object-fit: contain;
+    }
+
+    .product-info {
+      padding: 15px;
+    }
+
+    .product-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .product-info p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Add to Cart Button */
+    .add-to-cart {
+      display: block;
+      text-align: center;
+      background-color: #4f46e5;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-to-cart:hover {
+      background-color: #4338ca;
+    }
+
+    /* Flash Message Styles */
+    .flash-message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .flash-success {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    .flash-error {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f44336;
+      color: #fff;
+    }
+  
+    /* Apply Global Font */
+    .h3{
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f9f9f9;
+    }
+    a {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+  }
+    </style>
+</head>
+<body class="font-['helvetica_now_display']">
+  
+        <!-- Navbar -->
+  <nav class="w-full fixed top-0 left-0 px-5 py-5 flex justify-between items-center border-b-2 border-gray-300 bg-white/60 backdrop-blur-md">
+    <!-- Left side (Brand Name) -->
+    <h3 class="flex space-x-6 text-[16px] font-medium font-['Helvetica','Arial','sans-serif']">NEXON</h3>
+          <!-- Center: Search Bar -->
+    <div class="flex-1 mx-10">
+      <form class="relative" action="/shop" method="GET">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search"
+          value="<%= query || '' %>"
+          class="w-full border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:outline-none bg-white/70"
+        />
+        <button type="submit">
+          <i class="ri-search-line absolute left-3 top-1/3 transform -translate-y-1/2 text-gray-500"></i>
+        </button>
+      </form>
+      
+      </div>
+      
+      <!-- Right side (Navigation Links) -->
+      <div class="flex space-x-6 text-[16px] font-medium">
+        <a href="/shop" class="hover:underline">Home</a>
+        <a href="/orders" class="hover:underline">orders</a>
+        <a href="/cart" class="hover:underline">Cart</a>
+        <a href="/account" class="hover:underline">My account</a>
+        <% if(loggedin === 0){ %>
+          <a href="/login" class="hover:underline">Login</a>
+        <% } %>
+        
+        <a href="/logout" class="text-red-600 hover:underline">Logout</a>
+      </div>
+    </nav>
+    <br><br><br><br>
+  <!-- Google Font: Poppins -->
+ 
+
+<% if (error.length > 0) { %>
+  <div class="flash-message flash-error">
+    <%= error %>
+  </div>
 <% } %>
-<% if(success.length>0){ %>
-    <div class="absolute top-5 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 rounded-md bg-green-500 flash-message">
-        <span class="inline-block mt-1 mb-1 text-white">
-            <%= success %>
-        </span>
-    </div>
-    <% } %>
 
-    <div class="w-full h-screen flex items-start px-20 py-20">
-        <div class="w-[25%] flex h-screen flex-col items-start">
-            <div class="flex items-center gap-2">
-                <h3>sort by</h3>
-                <form action="/shop">
-                    <select class="border-[1px] px-2 py-1" name="sortby" id="">
-                        <option value="popular">Popular</option>
-                        <option value="newest">Newest</option>
-                    </select>
-                </form>
-            </div>
-            <div class="flex flex-col mt-20">
-                <a class="block w-fit mb-2" href="">New Collection</a>
-                <a class="block w-fit mb-2" href="">All Products</a>
-                <a class="block w-fit mb-2" href="">Discounted Products</a>
-            </div>
-            <div class="mt-32">
-                <a class="block w-fit mb-2" href="">Filter by :</a>
-                <a class="block w-fit mb-2" href="">Availability</a>
-                <a class="block w-fit mb-2" href="">Discount</a>
-            </div>
-        </div>
-        <div class="flex flex-wrap items-start gap-5">
-            <% products.forEach(function(product){ %>
-              <div class="w-60">
-                <div class="w-full h-52 flex items-center justify-center bg-[<%= product.bgcolor %>]">
-                  <img class="h-[12rem]" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" alt="">
-                </div>
-                <div class="flex justify-between bg-[<%= product.panelcolor %>] items-center px-4 py-4 text-[<%= product.textcolor %>]">
-                  <div>
-                    <h3><%= product.name %></h3>
-                    <h4>₹ <%= product.price %></h4>
-                  </div>
-                  <a class="w-7 h-7 flex items-center justify-center rounded-full bg-white" href="/addtocart/<%= product._id%>">
-                    <i style="color:black;" class="ri-add-line"></i>
-                  </a>
-                </div>
-              </div>
-            <% }) %>
+<% if (success.length > 0) { %>
+  <div class="flash-message flash-success">
+    <%= success %>
+  </div>
+<% } %>
+
+<!-- Main Page Container -->
+<div class="container flex gap-8">
+  <!-- Sidebar Section -->
+  <div class="w-1/4 sidebar">
+    <!-- Sort Products -->
+    <h3>Sort by</h3>
+    <form id="sortForm" action="/shop" method="GET">
+      <select name="sortby" onchange="updateSort()">
+        <option value="priceLowHigh" <%= sortBy === 'priceLowHigh' ? 'selected' : '' %>>
+          Price Low - High
+        </option>
+        <option value="priceHighLow" <%= sortBy === 'priceHighLow' ? 'selected' : '' %>>
+          Price High - Low
+        </option>
+      </select>
+    </form>
+    
+    <script>
+      function updateSort() {
+        const form = document.getElementById("sortForm");
+        const url = new URL(window.location.href);
+    
+        // Update the sortby parameter
+        url.searchParams.set("sortby", form.elements["sortby"].value);
+    
+        // Reload the page with updated query params
+        window.location.href = url.toString();
+      }
+    
+      // Ensure the correct option is selected after reload
+      document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortValue = urlParams.get("sortby");
+        if (sortValue) {
+          document.querySelector(`select[name="sortby"]`).value = sortValue;
+        }
+      });
+    </script>
+    
+    <!-- Categories Links -->
+    <h3 class="mt-6">Categories</h3>
+    <a href="/shop?category=all<%= sortBy ? '&sortby=' + sortBy : '' %>">All Products</a>
+    <a href="/shop?category=discounted<%= sortBy ? '&sortby=' + sortBy : '' %>">Discounted Products</a>
+    <a href="/shop?category=availability<%= sortBy ? '&sortby=' + sortBy : '' %>">Availability</a>
+    
+  </div>
+
+  <!-- Products Section -->
+  <div class="w-3/4">
+    <div class="product-grid">
+      <% if (products.length === 0) { %>
+        <p class="text-center col-span-3 text-gray-500">
+          No products found!
+        </p>
+      <% } %>
+      <% products.forEach(function (product) { %>
+        <div class="product-card">
+          <div
+            class="product-image bg-[<%= product.bgcolor %>]"
+          >
+            <img
+              src="data:image/jpeg;base64,<%= product.image.toString('base64') %>"
+              alt="<%= product.name %>"
+            />
           </div>
-          
-    <%- include('./partials/footer') %>
+          <div class="product-info">
+            <h3><%= product.name %></h3>
+            <% if (product.discountedPrice) { %>
+              <p>
+                <span class="line-through text-red-500">₹ <%= product.price %></span>
+                <span class="text-green-500 ml-2">₹ <%= product.discountedPrice %></span>
+              </p>
+            <% } else { %>
+              <p>₹ <%= product.price %></p>
+            <% } %>
+
+            <!-- Add to Cart Button -->
+            <a
+              class="add-to-cart"
+              href="/addtocart/<%= product._id %>"
+              >Add to Cart</a
+            >
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<%- include('./partials/footer') %>
+</body>
+</html>

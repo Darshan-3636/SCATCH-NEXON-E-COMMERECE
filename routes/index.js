@@ -8,25 +8,24 @@ const cartModel = require("../models/cart-model");
 const orderModel = require("../models/order-model");
 const axios = require("axios");
 const uniqid = require("uniqid");
-const sha256 = require("sha256");
-
-const {
-  getAccountDetails,
+const sha256 = require('sha256')
+const { 
+  getAccountDetails, 
   getUpdateAccount,
-  updateAccountDetails,
-} = require("../controllers/accountController");
+  updateAccountDetails 
+} = require('../controllers/accountController');
 
 // Route to get account details
-router.get("/account", isLoggedIn, getAccountDetails);
+router.get('/account', isLoggedIn, getAccountDetails);
 
 // Route to get update account page
-router.get("/update-account", isLoggedIn, getUpdateAccount);
+router.get('/update-account', isLoggedIn, getUpdateAccount);
 
 // Route to update account details
-router.post("/account", isLoggedIn, updateAccountDetails);
+router.post('/account', isLoggedIn, updateAccountDetails);
 
 router.get("/", function (req, res) {
-  res.redirect("/shop");
+  res.redirect('/shop');
 });
 
 router.get("/login", function (req, res) {
@@ -36,34 +35,92 @@ router.get("/login", function (req, res) {
 });
 
 router.get("/shop", async (req, res) => {
-  let error = req.flash("error");
-  let success = req.flash("success");
+  try {
+    let error = req.flash("error");
+    let success = req.flash("success");
 
-  let query = req.query.q ? req.query.q.trim() : "";
-  let products;
+    
+    let query = req.query.q ? req.query.q.trim() : "";
+    let sortBy = req.query.sortby || ""; 
+    let category = req.query.category || "all";
+    let availability = req.query.availability || "";
+    let discount = req.query.discount || "";
 
-  if (query) {
-    // Case-insensitive search in product name and description
-    products = await productModel.find({
-      $or: [
+    let filter = {};
+
+    //search //---- done
+    if (query) {
+      filter.$or = [
         { name: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" } },
-      ],
-    });
-  } else {
-    products = await productModel.find();
-  }
+      ];
+    }
 
-  res.render("shop", { products, error, success, query });
+    // Category filter //done ---
+    if (category === "discounted") {
+        filter.discount = { $gt: 0 }; // Ensures discount is greater than 0
+    }
+
+    //  Availability filter //----done
+    if (availability === "inStock") {
+      filter.stock = { $gt: 0 }; // Products with stock > 0
+    } else if (availability === "outOfStock") {
+      filter.stock = 0; // Products with no stock
+    }
+
+    // Discount 
+    if (discount === "true") {
+      filter.discount = { $gt: 0 }; // Ensures discount is greater than 0
+    }
+
+    // Sorting 
+
+    let sorting
+
+    if(sortBy === "priceLowHigh"){
+      sorting = {price:1}
+    } else if (sortBy === "priceHighLow"){
+      sorting = {price:-1}
+    }
+    // Fetch products with applied filters and sort options
+    let products = await productModel.find(filter).sort(sorting);
+    
+    let loggedin
+    if(!req.cookies.token === ""){
+      loggedin = 1
+    }
+
+    if(req.cookies.token === ""){
+      loggedin = 0;
+    }
+
+    res.render("shop", {
+      products,
+      query,
+      sortBy,
+      category,
+      availability,
+      discount,
+      error,
+      success,
+      loggedin
+    });
+
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Error loading products!");
+    res.redirect("/");
+  }
 });
+
+
 
 router.get("/cart", isLoggedIn, async (req, res) => {
   let error = req.flash("error");
   let success = req.flash("success");
   let cart = await cartModel
     .find({ userid: req.user.id })
-    .populate("productid")
-    .sort({ date: -1 });
+    .populate("productid").sort({date:-1});
   res.render("cart", { cart, error, success });
 });
 
@@ -72,18 +129,18 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
     let { pid } = req.params;
     let userid = req.user._id;
 
-    let cartItem = await cartModel.findOne({ userid, productid: pid });
+    let cartItem = await cartModel.findOne({ userid, productid: pid })
     if (cartItem) {
       cartItem.quantity += 1;
       await cartItem.save();
     } else {
-      await cartModel.create({ userid, productid: pid });
+      await cartModel.create({ userid, productid: pid});
     }
     req.flash("success", "Product added to your cart!");
     res.redirect("/shop");
   } catch (error) {
     console.error(error);
-    req.flash("error", error.message);
+    req.flash("error", "Something Went Wrong");
     res.redirect("/shop");
   }
 });
@@ -93,8 +150,7 @@ router.get("/orders", isLoggedIn, async (req, res) => {
   let success = req.flash("success");
   let orders = await orderModel
     .find({ userid: req.user._id })
-    .populate("productid")
-    .sort({ date: -1 });
+    .populate("productid").sort({date:-1});
   res.render("orders", { orders, error, success });
 });
 
@@ -147,6 +203,7 @@ router.post("/addtoorders", isLoggedIn, async (req, res) => {
     res.redirect("/cart");
   }
 });
+
 
 router.get("/reorder/:oid", isLoggedIn, async (req, res) => {
   try {
@@ -277,43 +334,58 @@ router.get("/removeitem/:pid", isLoggedIn, async (req, res) => {
 
 router.get("/logout", logout);
 
-const MERCHANT_ID = "M22WHG5I5GU1U";
-const PHONE_PE_HOST_URL = "https://api.phonepe.com/apis/hermes";
+
+//payment gatway
+
+const MERCHANT_ID = 'PGTESTPAYUAT86';
+const PHONE_PE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 const SALT_INDEX = 1;
-const SALT_KEY = "6dd1a0fb-51ea-4312-9f6b-09d0415f42d0";
+const SALT_KEY = '96434309-7796-489d-8924-ab56988a6076';
+const APP_BE_URL = "http://localhost:4000"; // our application
 
-// 🔹 Initiate a payment
-router.post("/pay", async (req, res) => {
-  
-    const merchantTransactionId = uniqid();
 
-    const normalPayload = {
-      merchantId: MERCHANT_ID,
-      merchantTransactionId,
-      merchantUserId: "123",
-      amount: 1000,
-      redirectUrl: `https://nexon-dashboard-78bm.onrender.com/payment/validate/${merchantTransactionId}`,
-      redirectMode: "REDIRECT",
-      callbackUrl: `https://nexon-dashboard-78bm.onrender.com/webhook/payment-status`,
-      mobileNumber: "9480233682",
-      paymentInstrument: { type: "PAY_PAGE" },
-    };
+// endpoint to initiate a payment
+router.post("/pay/:amount", isLoggedIn,async function (req, res, next) {
+  // Initiate a payment
 
-    // Encode payload
-    const base64EncodedPayload = Buffer.from(
-      JSON.stringify(normalPayload),
-      "utf8"
-    ).toString("base64");
+  // Transaction amount
+  const amount = req.params.amount;
 
-    // Generate X-VERIFY signature
-    const stringToHash = base64EncodedPayload + "/pg/v1/pay" + SALT_KEY;
-    const xVerifyChecksum = sha256(stringToHash).toString() + "###" + SALT_INDEX;
+  // User ID is the ID of the user present in our application DB
+  let userId = `${req.user.email}`;
 
-    try {
+  // Generate a unique merchant transaction ID for each transaction
+  let merchantTransactionId = uniqid();
 
-    const response = await axios.post(
+  // redirect url => phonePe will redirect the user to this url once payment is completed. It will be a GET request, since redirectMode is "REDIRECT"
+  let normalPayLoad = {
+    merchantId: MERCHANT_ID, //* PHONEPE_MERCHANT_ID . Unique for each account (private)
+    merchantTransactionId: merchantTransactionId,
+    merchantUserId: userId,
+    amount: amount * 100, // converting to paise
+    redirectUrl: `${APP_BE_URL}/payment/validate/${merchantTransactionId}`,
+    redirectMode: "REDIRECT",
+    mobileNumber: "9999999999",
+    paymentInstrument: {
+      type: "PAY_PAGE",
+    },
+  };
+
+  // make base64 encoded payload
+  let bufferObj = Buffer.from(JSON.stringify(normalPayLoad), "utf8");
+  let base64EncodedPayload = bufferObj.toString("base64");
+
+  // X-VERIFY => SHA256(base64EncodedPayload + "/pg/v1/pay" + SALT_KEY) + ### + SALT_INDEX
+  let string = base64EncodedPayload + "/pg/v1/pay" + SALT_KEY;
+  let sha256_val = sha256(string);
+  let xVerifyChecksum = sha256_val + "###" + SALT_INDEX;
+
+  axios
+    .post(
       `${PHONE_PE_HOST_URL}/pg/v1/pay`,
-      { request: base64EncodedPayload },
+      {
+        request: base64EncodedPayload,
+      },
       {
         headers: {
           "Content-Type": "application/json",
@@ -321,74 +393,63 @@ router.post("/pay", async (req, res) => {
           accept: "application/json",
         },
       }
-    );
-
-    if (response.data.success) {
-      // return res.redirect(response.data.data.instrumentResponse.redirectInfo.url);
-      return res.send("it is getting inititated");
-    }
-
-    throw new Error(response.data.message || "Payment initiation failed");
-  } catch (error) {
-    console.error("Payment error:", error);
-    return res.status(500).json({ error: "Something went wrong while initiating payment." });
-  }
-});
-
-// 🔹 Webhook for payment status updates
-router.post("/webhook/payment-status", async (req, res) => {
-  try {
-    const data = req.body;
-    console.log("Received webhook data:", JSON.stringify(data, null, 2));
-
-    if (!data || !data.code || !data.merchantTransactionId) {
-      return res.status(400).json({ error: "Invalid webhook data received" });
-    }
-
-    if (data.code === "PAYMENT_SUCCESS") {
-      console.log(`✅ Payment successful for Transaction ID: ${data.merchantTransactionId}`);
-    } else {
-      console.log(`❌ Payment failed for Transaction ID: ${data.merchantTransactionId}`);
-    }
-
-    return res.status(200).json({ message: "Webhook received successfully" });
-  } catch (error) {
-    console.error("Webhook error:", error);
-    return res.status(500).json({ error: "Error processing webhook" });
-  }
-});
-
-// 🔹 Validate Payment Status
-router.get("/payment/validate/:merchantTransactionId", async (req, res) => {
-  try {
-    const { merchantTransactionId } = req.params;
-    const statusUrl = `${PHONE_PE_HOST_URL}/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}`;
-
-    const xVerifyString = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}${SALT_KEY}`;
-    const xVerifyChecksum = sha256(xVerifyString).toString() + "###" + SALT_INDEX;
-
-    const response = await axios.get(statusUrl, {
-      headers: {
-        "Content-Type": "application/json",
-        "X-VERIFY": xVerifyChecksum,
-        "X-MERCHANT-ID": MERCHANT_ID,
-        accept: "application/json",
-      },
+    )
+    .then(function (response) {
+      res.redirect(response.data.data.instrumentResponse.redirectInfo.url);
+    })
+    
+    .catch(function (error) {
+      res.send(error);
     });
+});
 
-    if (response.data.code === "PAYMENT_SUCCESS") {
-      return res.send(`
-        <form action="/addtoorders" method="POST">
-          <input type="hidden" name="key" value="value">
-        </form>
-        <script>document.forms[0].submit();</script>
-      `);
-    }
+// endpoint to check the status of payment
+router.get("/payment/validate/:merchantTransactionId", async function (req, res) {
+  const { merchantTransactionId } = req.params;
+  // check the status of the payment using merchantTransactionId
+  if (merchantTransactionId) {
+    let statusUrl =
+      `${PHONE_PE_HOST_URL}/pg/v1/status/${MERCHANT_ID}/` +
+      merchantTransactionId;
 
-    return res.status(400).json({ error: "Payment failed. Please try again." });
-  } catch (error) {
-    console.error("Validation error:", error);
-    return res.status(500).json({ error: "Something went wrong while validating payment." });
+    // generate X-VERIFY
+    let string =
+      `/pg/v1/status/${MERCHANT_ID}/` + merchantTransactionId + SALT_KEY;
+    let sha256_val = sha256(string);
+    let xVerifyChecksum = sha256_val + "###" + SALT_INDEX;
+
+    axios
+      .get(statusUrl, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-VERIFY": xVerifyChecksum,
+          "X-MERCHANT-ID": merchantTransactionId,
+          accept: "application/json",
+        },
+      })
+      .then(function (response) {
+        if (response.data && response.data.code === "PAYMENT_SUCCESS") {
+          // redirect to FE payment success status page
+          res.send(`
+            <form action="/addtoorders" method="POST">
+              <input type="hidden" name="key" value="value">
+            </form>
+            <script>
+              document.forms[0].submit();
+            </script>
+          `);
+          
+        } else {
+          req.flash('error','payment failed')
+        }
+      })
+      .catch(function (error) {
+        req.flash('error',`${error.data}`);
+        res.redirect('/cart')
+      });
+  } else {
+    req.flash('error',`Somthing Went Wrong`);
+    res.redirect('/cart')
   }
 });
 
