@@ -1,0 +1,32 @@
+services:
+  - name: nexon-dashboard
+    type: web
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free  
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: nexon-mongo
+          property: connectionString
+      - key: JWT_KEY
+        sync: false
+      - key: EXPRESS_SESSION_SECRET
+        sync: false
+      - key: PHONEPE_MERCHANT_ID
+        sync: false
+      - key: PHONEPE_SALT_KEY
+        sync: false
+      - key: PHONEPE_SALT_INDEX
+        sync: false
+      - key: APP_BE_URL
+        sync: false
+    autoDeploy: true
+
+databases:
+  - name: nexon-mongo
+    plan: free  
+
