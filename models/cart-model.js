@@ -19,8 +19,7 @@ const cartSchema =  mongoose.Schema({
     date:{
         type:Date,
         default:Date.now
-    },
-    totalAmount:Number
+    }
 })
 
 module.exports = mongoose.model('cart',cartSchema)

@@ -59,8 +59,7 @@ const orderSchema =  mongoose.Schema({
     orderStatus:{
         type:String,
         default:"pending"
-    },
-    totalAmount:Number
+    }
 })
 
 module.exports = mongoose.model('order',orderSchema)

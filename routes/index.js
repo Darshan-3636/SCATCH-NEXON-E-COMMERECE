@@ -49,7 +49,7 @@ router.get("/cart", isLoggedIn, async (req, res) => {
   let success = req.flash("success");
   let cart = await cartModel
     .find({ userid: req.user.id })
-    .populate("productid");
+    .populate("productid").sort({date:-1});
   res.render("cart", { cart, error, success });
 });
 
@@ -58,22 +58,18 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
     let { pid } = req.params;
     let userid = req.user._id;
 
-    let cartItem = await cartModel.findOne({ userid, productid: pid }).populate('productid');
+    let cartItem = await cartModel.findOne({ userid, productid: pid })
     if (cartItem) {
       cartItem.quantity += 1;
-      let totalAmount = (cartItem.productid.price * cartItem.quantity) - (cartItem.productid.discount * cartItem.quantity);
-      cartItem.totalAmount = totalAmount
       await cartItem.save();
     } else {
-      let product = await productModel.findOne({_id:pid})
-      let totalAmount = product.price - product.discount
-      await cartModel.create({ userid, productid: pid, quantity: 1 ,totalAmount});
+      await cartModel.create({ userid, productid: pid});
     }
     req.flash("success", "Product added to your cart!");
     res.redirect("/shop");
   } catch (error) {
     console.error(error);
-    req.flash("error", error.message);
+    req.flash("error", "Something Went Wrong");
     res.redirect("/shop");
   }
 });
@@ -83,7 +79,7 @@ router.get("/orders", isLoggedIn, async (req, res) => {
   let success = req.flash("success");
   let orders = await orderModel
     .find({ userid: req.user._id })
-    .populate("productid");
+    .populate("productid").sort({date:-1});
   res.render("orders", { orders, error, success });
 });
 
@@ -92,20 +88,35 @@ router.post("/addtoorders", isLoggedIn, async (req, res) => {
     let userid = req.user._id;
 
     // Get all cart items for the user
-    let cartItems = await cartModel.find({ userid });
+    let cartItems = await cartModel.find({ userid }).populate("productid");
 
     if (cartItems.length === 0) {
       req.flash("error", "Your cart is empty!");
       return res.redirect("/cart");
     }
 
+    // Check stock availability for all items
+    for (let item of cartItems) {
+      if (item.productid.stock < item.quantity) {
+        req.flash("error", `Not enough stock for ${item.productid.name}`);
+        return res.redirect("/cart");
+      }
+    }
+
     // Convert cart items to order format
     let orders = cartItems.map((item) => ({
       userid: item.userid,
-      productid: item.productid,
+      productid: item.productid._id,
       quantity: item.quantity,
-      totalAmount:item.totalAmount
     }));
+
+    // Reduce stock in productModel for all valid orders
+    for (let item of cartItems) {
+      await productModel.updateOne(
+        { _id: item.productid._id },
+        { $inc: { stock: -item.quantity } } // Decrease stock
+      );
+    }
 
     // Insert all orders in bulk
     await orderModel.insertMany(orders);
@@ -121,6 +132,7 @@ router.post("/addtoorders", isLoggedIn, async (req, res) => {
     res.redirect("/cart");
   }
 });
+
 
 router.get("/reorder/:oid", isLoggedIn, async (req, res) => {
   try {
