@@ -83,7 +83,7 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
     res.redirect("/shop");
   } catch (error) {
     console.error(error);
-    req.flash("error", "Something Went Wrong");
+    req.flash("error", error.message);
     res.redirect("/shop");
   }
 });
@@ -284,12 +284,12 @@ const SALT_KEY = "6dd1a0fb-51ea-4312-9f6b-09d0415f42d0";
 
 // 🔹 Initiate a payment
 router.post("/pay", async (req, res) => {
-  try {
+  
     const merchantTransactionId = uniqid();
 
     const normalPayload = {
       merchantId: MERCHANT_ID,
-      merchantTransactionId: `${merchantTransactionId}`,
+      merchantTransactionId,
       merchantUserId: "123",
       amount: 1000,
       redirectUrl: `https://nexon-dashboard-78bm.onrender.com/payment/validate/${merchantTransactionId}`,
@@ -308,6 +308,8 @@ router.post("/pay", async (req, res) => {
     // Generate X-VERIFY signature
     const stringToHash = base64EncodedPayload + "/pg/v1/pay" + SALT_KEY;
     const xVerifyChecksum = sha256(stringToHash).toString() + "###" + SALT_INDEX;
+
+    try {
 
     const response = await axios.post(
       `${PHONE_PE_HOST_URL}/pg/v1/pay`,
