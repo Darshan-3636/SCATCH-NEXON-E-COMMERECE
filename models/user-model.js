@@ -1,3 +1,4 @@
+const { HostAddress } = require('mongodb');
 const mongoose = require('mongoose');
 
 // const userSchema = mongoose.Schema({
@@ -35,7 +36,8 @@ const userSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         default:[],
         ref:"product"
-    }]
+    }],
+    address:String,
 })
 
 module.exports = mongoose.model('user', userSchema);

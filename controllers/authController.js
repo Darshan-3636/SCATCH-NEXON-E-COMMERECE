@@ -4,7 +4,7 @@ const {generateToken} = require('../utils/genrateToken')
 
 module.exports.registerUser = async (req, res)=>{
     try{
-        let {email, password, fullname} = req.body;
+        let {email, password, username} = req.body;
 
         let user = await userModel.findOne({email: email})
         if (user) {
@@ -19,7 +19,7 @@ module.exports.registerUser = async (req, res)=>{
                         let user = await userModel.create({
                             email,
                             password:hash,
-                            fullname
+                            username
                         })
                         let token = generateToken(user)
                         res.cookie("token",token)

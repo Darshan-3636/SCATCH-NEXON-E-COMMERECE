@@ -9,7 +9,20 @@ const orderModel = require("../models/order-model");
 const axios = require("axios");
 const uniqid = require("uniqid");
 const sha256 = require('sha256')
+const { 
+  getAccountDetails, 
+  getUpdateAccount,
+  updateAccountDetails 
+} = require('../controllers/accountController');
 
+// Route to get account details
+router.get('/account', isLoggedIn, getAccountDetails);
+
+// Route to get update account page
+router.get('/update-account', isLoggedIn, getUpdateAccount);
+
+// Route to update account details
+router.post('/account', isLoggedIn, updateAccountDetails);
 
 router.get("/", function (req, res) {
   res.redirect('/shop');
