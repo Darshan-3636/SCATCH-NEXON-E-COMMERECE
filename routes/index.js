@@ -338,9 +338,10 @@ router.get("/logout", logout);
 //payment gatway
 
 const MERCHANT_ID = 'M22WHG5I5GU1U';
+const SALT_KEY = '6dd1a0fb-51ea-4312-9f6b-09d0415f42d0';
 const PHONE_PE_HOST_URL = "https://api.phonepe.com/apis/hermes";
 const SALT_INDEX = 1;
-const SALT_KEY = '6dd1a0fb-51ea-4312-9f6b-09d0415f42d0';
+
 const APP_BE_URL = "https://nexon-dashboard-78bm.onrender.com"; // our application
 
 
@@ -365,7 +366,7 @@ router.post("/pay/:amount", isLoggedIn,async function (req, res, next) {
     amount: amount * 100, // converting to paise
     redirectUrl: `${APP_BE_URL}/payment/validate/${merchantTransactionId}`,
     redirectMode: "REDIRECT",
-    mobileNumber: "9999999999",
+    mobileNumber: "6361594654",
     paymentInstrument: {
       type: "PAY_PAGE",
     },
@@ -397,7 +398,6 @@ router.post("/pay/:amount", isLoggedIn,async function (req, res, next) {
     .then(function (response) {
       res.redirect(response.data.data.instrumentResponse.redirectInfo.url);
     })
-    
     .catch(function (error) {
       res.send(error);
     });
@@ -423,7 +423,7 @@ router.get("/payment/validate/:merchantTransactionId", async function (req, res)
         headers: {
           "Content-Type": "application/json",
           "X-VERIFY": xVerifyChecksum,
-          "X-MERCHANT-ID": merchantTransactionId,
+          "X-MERCHANT-ID": MERCHANT_ID,
           accept: "application/json",
         },
       })
