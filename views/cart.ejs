@@ -217,7 +217,7 @@
           <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 20 %></td>
         </tr>
       </table>
-      <form action="/pay/1" method="post">
+      <form action="/pay/<%= total - totaldiscount + 20 %>" method="post">
         <button class="w-full text-xl bg-blue-500 rounded-md mt-4 p-2 text-white">Place Order</button>
       </form>
     </div>
