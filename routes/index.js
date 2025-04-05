@@ -337,10 +337,10 @@ router.get("/logout", logout);
 
 //payment gatway
 
-const MERCHANT_ID = 'PGTESTPAYUAT86';
+const MERCHANT_ID = 'M22WHG5I5GU1U';
 const PHONE_PE_HOST_URL = "https://api.phonepe.com/apis/hermes";
 const SALT_INDEX = 1;
-const SALT_KEY = '96434309-7796-489d-8924-ab56988a6076';
+const SALT_KEY = '6dd1a0fb-51ea-4312-9f6b-09d0415f42d0';
 const APP_BE_URL = "https://nexon-dashboard-78bm.onrender.com"; // our application
 
 
