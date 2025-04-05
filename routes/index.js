@@ -338,10 +338,10 @@ router.get("/logout", logout);
 //payment gatway
 
 const MERCHANT_ID = 'PGTESTPAYUAT86';
-const PHONE_PE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
+const PHONE_PE_HOST_URL = "https://api.phonepe.com/apis/hermes";
 const SALT_INDEX = 1;
 const SALT_KEY = '96434309-7796-489d-8924-ab56988a6076';
-const APP_BE_URL = "http://localhost:4000"; // our application
+const APP_BE_URL = "https://nexon-dashboard-78bm.onrender.com"; // our application
 
 
 // endpoint to initiate a payment
@@ -441,6 +441,7 @@ router.get("/payment/validate/:merchantTransactionId", async function (req, res)
           
         } else {
           req.flash('error','payment failed')
+          res.redirect('/cart')
         }
       })
       .catch(function (error) {
