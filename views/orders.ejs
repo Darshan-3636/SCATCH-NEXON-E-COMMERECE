@@ -125,8 +125,8 @@
             <tr>
               <th>Product</th>
               <th>Name</th>
-              <th>Price</th>
               <th>Quantity</th>
+              <th>Total Amount</th>
               <th>Date</th>
               <th>Order Status</th>
               <th>Options</th>
@@ -139,8 +139,8 @@
                   <img src="data:image/jpeg;base64,<%= product.productid.image.toString('base64') %>" alt="Product Image">
                 </td>
                 <td><%= product.productid.name %></td>
-                <td>₹ <%= product.productid.price %></td>
                 <td><%= product.quantity %></td>
+                <td>₹ <%= product.totalAmount %></td>
                 <td><%= new Date(product.date).toLocaleString('en-IN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) %></td>
                 <td><%= product.orderStatus %></td>
                 <td>

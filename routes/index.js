@@ -113,8 +113,6 @@ router.get("/shop", async (req, res) => {
   }
 });
 
-
-
 router.get("/cart", isLoggedIn, async (req, res) => {
   let error = req.flash("error");
   let success = req.flash("success");
@@ -129,15 +127,26 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
     let { pid } = req.params;
     let userid = req.user._id;
 
-    let cartItem = await cartModel.findOne({ userid, productid: pid })
-    if (cartItem) {
-      cartItem.quantity += 1;
-      await cartItem.save();
+    let product = await productModel.findById(pid)
+
+    if(product.stock >0 ){
+      let cartItem = await cartModel.findOne({ userid, productid: pid })
+        if (cartItem) {
+          if(cartItem.quantity === product.stock){
+            req.flash("error", `Only ${product.stock} available`);
+            return res.redirect("/shop");
+          }
+          cartItem.quantity += 1;
+          await cartItem.save();
+        } else {
+          await cartModel.create({ userid, productid: pid});
+        }
+        req.flash("success", "Product added to your cart!");
+        return res.redirect("/shop"); 
     } else {
-      await cartModel.create({ userid, productid: pid});
+      req.flash("error", "Product Out Of Stock");
+      return res.redirect("/shop");
     }
-    req.flash("success", "Product added to your cart!");
-    res.redirect("/shop");
   } catch (error) {
     console.error(error);
     req.flash("error", "Something Went Wrong");
@@ -175,11 +184,19 @@ router.post("/addtoorders", isLoggedIn, async (req, res) => {
     }
 
     // Convert cart items to order format
-    let orders = cartItems.map((item) => ({
-      userid: item.userid,
-      productid: item.productid._id,
-      quantity: item.quantity,
-    }));
+    let orders = cartItems.map((item) => {
+      const price = item.productid?.price || 0;
+      const discount = item.productid?.discount || 0;
+      const quantity = item.quantity || 1;
+    
+      return {
+        userid: item.userid,
+        productid: item.productid._id,
+        quantity,
+        totalAmount: (price - discount) * quantity
+      };
+    });
+    
 
     // Reduce stock in productModel for all valid orders
     for (let item of cartItems) {
@@ -271,15 +288,15 @@ router.get("/removeorder/:oid", isLoggedIn, async (req, res) => {
 
 router.get("/addquantity/:cid", isLoggedIn, async (req, res) => {
   try {
-    let cartitem = await cartModel.findOne({ _id: req.params.cid });
+    let cartitem = await cartModel.findOne({ _id: req.params.cid }).populate('productid');
 
-    if (cartitem) {
+    if (cartitem && cartitem.quantity < cartitem.productid.stock) {
       cartitem.quantity += 1;
       await cartitem.save();
       req.flash("success", "Quantity Increased");
       res.redirect("/cart");
-    } else {
-      req.flash("error", "Something went Wrong");
+    } else if(cartitem.quantity === cartitem.productid.stock){
+      req.flash("error", `Only ${cartitem.productid.stock} Available`);
       res.redirect("/cart");
     }
   } catch (err) {
@@ -314,12 +331,12 @@ router.get("/reducequantity/:cid", isLoggedIn, async (req, res) => {
   }
 });
 
-router.get("/removeitem/:pid", isLoggedIn, async (req, res) => {
+router.get("/removeitem/:cid", isLoggedIn, async (req, res) => {
   try {
-    let cartitem = await cartModel.find({ productid: req.params.pid });
+    let cartitem = await cartModel.findById(req.params.cid);
 
     if (cartitem) {
-      await cartModel.deleteMany({ productid: req.params.pid });
+      await cartModel.deleteOne({ _id: req.params.cid });
       req.flash("success", "Item Removed From Cart");
       return res.redirect("/cart");
     } else {
