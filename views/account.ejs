@@ -48,6 +48,35 @@
             color: #ff6b6b;
             font-style: italic;
         }
+        .flash-message {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .flash-success {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        background-color: #4caf50;
+        color: #fff;
+        }
+
+        .flash-error {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        background-color: #f44336;
+        color: #fff;
+        }
+        img {
+            max-width: 300px;
+            max-height: 150px;
+            object-fit: cover; /* Optional: makes sure the image is contained nicely */
+            border-radius: 8px; /* Optional: for rounded corners */
+        }
     </style>
             <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
             <script src="https://cdn.tailwindcss.com"></script>
@@ -82,11 +111,33 @@
     </nav>
     <br>
     <% }%>
-    
+    <br><br><br><br>
+    <% if (error.length > 0) { %>
+        <div class="flash-message flash-error">
+          <%= error %>
+        </div>
+      <% } %>
+      
+      <% if (success.length > 0) { %>
+        <div class="flash-message flash-success">
+          <%= success %>
+        </div>
+      <% } %>
     
     <div class="container">
         <h1>My Account Details</h1>
         
+        <div class="account-detail">
+            <label>Profile Picture</label>
+            <% if (user.picture) { %>
+                <div class="value"><img src="data:image/jpeg;base64,<%= user.picture.toString('base64') %>" alt=""></div>
+            <% }  else { %>
+                <div class="value missing-info">
+                    No Profile added 
+                    <a href="/update-account" class="update-link">(Update)</a>
+                </div>
+            <% } %> 
+        </div>
         <div class="account-detail">
             <label>Name</label>
             <% if (user.username) { %>
@@ -142,4 +193,19 @@
     <br><br><br>
     <h1><a href="/orders" class="update-link">My orders</a></h1>
 </body>
+<script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Select all flash messages
+      var flashMessages = document.querySelectorAll('.flash-message');
+  
+      // Iterate through each flash message
+      flashMessages.forEach(function(message) {
+        // Set a timeout to remove the message after 5 seconds (5000 milliseconds)
+        setTimeout(function() {
+          message.style.display = 'none';
+        }, 5000);
+      });
+    });
+  </script>
 </html>

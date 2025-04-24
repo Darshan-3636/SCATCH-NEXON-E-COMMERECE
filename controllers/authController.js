@@ -2,39 +2,7 @@ const userModel = require('../models/user-model');
 const bcrypt = require('bcrypt');
 const {generateToken} = require('../utils/genrateToken')
 
-module.exports.registerUser = async (req, res)=>{
-    try{
-        let {email, password, username} = req.body;
 
-        let user = await userModel.findOne({email: email})
-        if (user) {
-            req.flash("error","you have already registed, please login");
-            res.redirect('/login')
-        } 
-        else {
-            bcrypt.genSalt(10, function(err, salt) {
-                bcrypt.hash(password, salt,async function(err, hash) {
-                    if (err) return res.send(err.message);
-                    else{
-                        let user = await userModel.create({
-                            email,
-                            password:hash,
-                            username
-                        })
-                        let token = generateToken(user)
-                        res.cookie("token",token)
-                        req.flash('success','you have successfully created an account')
-                        res.redirect('/shop');
-                    }  
-                });
-            });
-        }    
-    }
-    catch(err){
-        req.flash("error","Something Went Wrong");
-        res.redirect('/login')
-    }
-}
 
 module.exports.loginUser =  async (req, res)=>{
     let {email , password} = req.body;

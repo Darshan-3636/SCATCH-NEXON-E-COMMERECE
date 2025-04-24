@@ -14,6 +14,7 @@ const {
   getUpdateAccount,
   updateAccountDetails 
 } = require('../controllers/accountController');
+const upload = require('../config/multer-config');
 
 // Route to get account details
 router.get('/account', isLoggedIn, getAccountDetails);
@@ -23,6 +24,23 @@ router.get('/update-account', isLoggedIn, getUpdateAccount);
 
 // Route to update account details
 router.post('/account', isLoggedIn, updateAccountDetails);
+
+router.post('/account-profile',isLoggedIn ,upload.single('profile'),async (req, res)=>{
+  try{
+    await userModel.updateOne({_id:req.user._id},{picture:req.file.buffer});
+    req.flash('success', 'Profile Picture Updated');
+    return res.redirect(req.get("Referrer") || "/");
+    }
+    catch(err){
+        if(req.file === undefined){
+            req.flash('error', 'Select Picture First');
+            return res.redirect(req.get("Referrer") || "/");
+        }
+        
+        req.flash('error', 'Something went Wrong');
+        return res.redirect(req.get("Referrer") || "/");
+    }
+})
 
 router.get("/", function (req, res) {
   res.redirect('/shop');
@@ -163,7 +181,7 @@ router.get("/orders", isLoggedIn, async (req, res) => {
   res.render("orders", { orders, error, success });
 });
 
-router.post("/addtoorders", isLoggedIn, async (req, res) => {
+router.get("/addtoorders", isLoggedIn, async (req, res) => {
   try {
     let userid = req.user._id;
 
