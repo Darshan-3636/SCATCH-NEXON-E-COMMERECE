@@ -7,6 +7,84 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    .flash-message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+
+    .flash-success {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    .flash-error {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background-color: #f44336;
+      color: #fff;
+    }
+    .main-content {
+    background-color: #D2D2D2;
+    }
+    .main-header {
+        background: #25283B;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        height: 82px;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-container {
+        max-width: 1440px;
+        margin-top: 10px;
+        margin-left: 20px;
+        padding: 0 2rem;
+    }
+
+    /* Search Bar Transitions */
+    input::placeholder {
+        transition: opacity 0.2s ease;
+    }
+
+    input:focus::placeholder {
+        opacity: 0.5;
+    }
+    
+
+    /* Main Content */
+    .main-content {
+        margin-left: 300px;
+        padding: 6rem 2rem 2rem;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    .a{
+      background-color: #25283B;
+    }
+    .b{
+      background-color: #25283B;
+      margin-left: 1100px;
+    }
+
+
     .brand, a{
       font-family: 'Helvetica', 'Arial', sans-serif;
       background-color: #f9f9f9;
@@ -32,12 +110,13 @@
       font-family: 'Helvetica', 'Arial', sans-serif;
       background-color: #f9f9f9;
       width: 65%;
-      background-color: #fff;
+      background-color: #c3d5f4;
       padding: 30px;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba;
       max-height: 100vh;
       overflow: hidden;
+      margin-top: 100px;
     }
 
     .price-breakdown {
@@ -46,8 +125,14 @@
       width: 30%;
       background-color: #fff;
       padding: 30px;
-      border-radius: 8px;
+      border-radius: 14px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-top: 100px;
+    }
+    .users-table{
+      border: 2px;
+      border-radius: 8px;
+      box-shadow:rgba(0, 0, 0, 0.8);
     }
 
     .users-table table, .price-breakdown table {
@@ -84,38 +169,26 @@
     }
   </style>
 </head>
-<body class="font-['helvetica_now_display']">
-  
-    <% var loggedin = typeof loggedin !== "undefined" ? loggedin:true %>
-    <% if(loggedin){ %>
-        <!-- Navbar -->
-  <nav class="w-full fixed top-0 left-0 px-5 py-5 flex justify-between items-center border-b-2 border-gray-300 bg-white/60 backdrop-blur-md">
-    <!-- Left side (Brand Name) -->
-    <h3 class="brand">NEXON</h3>
-          <!-- Center: Search Bar -->
-    <div class="flex-1 mx-10">
-        <form class="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            class="w-full border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:outline-none bg-white/70"
-          />
-          <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-        </form>
-      </div>
-      
-      <!-- Right side (Navigation Links) -->
-      <div class="flex space-x-6 text-[16px] font-medium">
-        <a href="/shop" class="hover:underline">Home</a>
-        <a href="/orders" class="hover:underline">orders</a>
-        <a href="/cart" class="hover:underline">Cart</a>
-        <a href="/account" class="hover:underline">My account</a>
-        <a href="/logout" class="text-red-600 hover:underline">Logout</a>
-      </div>
+
+<body>
+  <header class="main-header">
+    <nav class="nav-container">
+      <div class="flex items-center justify-between h-16 gap-100">
+        <div class="flex items-center gap-12 flex-shrink-0">
+          <h1 style="color: white; font-weight: bold; font-size: 2.5rem; margin-left: 40px;">NEXON</h1>
+          <div class="nav-links hidden lg:flex items-center gap-6">
+            <a class="b" style="color: white;" href="/shop" class="hover:underline">Home</a>
+            <a class="a" style="color: white;" href="/orders" class="hover:underline">orders</a>
+            
+            <a class="a" style="color: white;" href="/account" class="hover:underline">My account</a>
+          </div>
+        </div>
+        <div class="flex-1 max-w-2xl mx-4 lg:mx-8">
+          <div class="relative">
+            
+         
     </nav>
-    <br>
-    <% }%>
-  <br><br><br>
+  </header><br><br>
 
 
   <% if(error.length>0){ %>
@@ -139,7 +212,7 @@
   <% } else { %>
   <main>
     <div class="users-section">
-      <h1>Cart</h1>
+      <h1 style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; font-size: 28px;">Cart</h1>
       <div class="users-table">
         <table>
           <thead>
@@ -171,7 +244,7 @@
                     <input type="hidden" name="productId" value="<%= product.productid._id %>">
                     <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-md">Reduce Quantity</button>
                   </form><br>
-                  <form action="/removeitem/<%= product._id %>" >
+                  <form action="/removeitem/<%= product.productid._id %>" >
                     <input type="hidden" name="productId" value="<%= product.productid._id %>">
                     <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-md">Remove Product</button>
                   </form>
@@ -206,7 +279,7 @@
         </tr>
         <tr>
           <th>Platform Fee</th>
-          <td>₹ 2</td>
+          <td>₹ 20</td>
         </tr>
         <tr>
           <th>Shipping Fee</th>
@@ -214,7 +287,7 @@
         </tr>
         <tr>
           <th>Total Amount</th>
-          <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 2 %></td>
+          <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 20 %></td>
         </tr>
       </table>
       <form action="/pay/<%= total - totaldiscount + 20 %>" method="post">
