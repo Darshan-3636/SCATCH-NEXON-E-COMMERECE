@@ -47,7 +47,7 @@ const updateAccountDetails = async (req, res) => {
       normalize(address) !== normalize(user.address);
     
     if (!isChanged) {
-      req.flash('error', 'No changes detected.');
+      req.flash('error', 'No changes detected');
       return res.redirect('/update-account');
     }
 

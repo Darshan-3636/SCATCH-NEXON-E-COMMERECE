@@ -181,7 +181,7 @@ router.get("/orders", isLoggedIn, async (req, res) => {
   res.render("orders", { orders, error, success });
 });
 
-router.get("/addtoorders", isLoggedIn, async (req, res) => {
+router.post("/addtoorders", isLoggedIn, async (req, res) => {
   try {
     let userid = req.user._id;
 
