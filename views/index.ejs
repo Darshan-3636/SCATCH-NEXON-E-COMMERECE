@@ -5,31 +5,121 @@
         <title>Document</title>
         <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
         <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            .flash-message {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                }
+
+                .flash-success {
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                background-color: #4caf50;
+                color: #fff;
+                }
+
+                .flash-error {
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                background-color: #f44336;
+                color: #fff;
+                }
+                ul {
+                    list-style-type: disc; /* Default bullets */
+                    padding-left: 20px;    /* Nice left spacing */
+                }
+                li {
+                    margin-bottom: 8px;     /* Space between points */
+                    font-size: 15px;
+                    line-height: 1.6;
+                }
+                h2 {
+                    margin-top: 20px;
+                    font-size: 22px;
+                    color: #000000; /* Soft Indigo color */
+                }
+                
+                /* Modal container - ensures perfect centering */
+                #buyerRulesModal {
+                    display: none; /* Start hidden */
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    z-index: 9999;
+                    overflow-y: auto; /* Allows scrolling if content is too tall */
+                    padding: 20px;
+                }
+
+                /* Modal content wrapper - handles centering */
+                #buyerRulesModal > div {
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 100%;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Actual modal content box */
+                #buyerRulesModal .bg-white {
+                    width: 100%;
+                    max-width: 600px; /* Adjust as needed */
+                    background: white;
+                    border-radius: 8px;
+                    padding: 24px;
+                    position: relative;
+                    margin: 20px 0;
+                }
+
+                /* Button container */
+                #buyerRulesModal .text-center {
+                    width: 100%;
+                    max-width: 600px; /* Same as modal content */
+                    text-align: center;
+                    margin-top: 16px;
+                }
+
+                /* Responsive adjustments */
+                @media (max-width: 768px) {
+                    #buyerRulesModal {
+                        padding: 10px;
+                    }
+                    
+                    #buyerRulesModal .bg-white,
+                    #buyerRulesModal .text-center {
+                        max-width: 95%;
+                    }
+                }
+        </style>
       </head>
 <body>
     
 
-    <% if(error.length>0){ %>
-        <div class="absolute top-5 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 rounded-md bg-red-500 flash-message">
-            <span class="inline-block mt-1 mb-1 text-white">
-                <%= error %>
-            </span>
+    <% if (error.length > 0) { %>
+        <div class="flash-message flash-error">
+          <%= error %>
         </div>
-    <% } %>
-    <% if(success.length>0){ %>
-        <div class="absolute top-5 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 rounded-md bg-green-500 flash-message">
-            <span class="inline-block mt-1 mb-1 text-white">
-                <%= success %>
-            </span>
+      <% } %>
+      
+      <% if (success.length > 0) { %>
+        <div class="flash-message flash-success">
+          <%= success %> 
         </div>
-        <% } %>
+      <% } %>
             <div class="w-full h-screen flex px-20">
                 <a href="/shop"><h1><b>< GO BACK</b></h1></a>
                 <div class="w-1/2 flex items-center justify-center h-screen">
                     <div class="w-full px-32">
                         <h3 class="text-4xl">welcome to <span class="text-blue-400 font-semibold">NEXON</span></h3>
                         <h4 class="text-2xl mb-5">create your account</h4>
-                        <form autocomplete="off" action="/users/register" method="post" enctype="multipart/form-data">
+                        <form autocomplete="off" action="/users/register" method="post" enctype="multipart/form-data" id="register-form">
                             <input
                                 class="bg-zinc-100 block w-full px-3 py-2 border-[1px] rounded-md mb-3 border-zinc-200"
                                 type="text" placeholder="Full Name" name="username" required>
@@ -52,7 +142,7 @@
                             <input class="px-5 rounded-full py-3 mt-2 bg-blue-500 text-white" type="submit"
                                 value="Create My Account">
                         </form>
-                    </div>
+                     </div>
                 </div>
                 <div class="w-1/2 flex items-center justify-center h-screen">
                     <div class="w-full px-32">
@@ -70,4 +160,54 @@
                     </div>
                 </div>
             </div>
+            <div id="buyerRulesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+                <div class="w-full max-w-2xl px-4">
+                    <div class="bg-white rounded-lg p-6 max-h-[80vh] overflow-y-auto relative">
+                        <button id="closeModal" class="absolute top-2 right-2 text-2xl font-bold">&times;</button>
+                        <h2 class="text-xl font-semibold mb-4">🔹 To Know :</h2>
+                        <ul class="list-disc list-inside text-zinc-700 space-y-2">
+                            <li><strong>Nexon</strong> will not store or have access to your payment credentials.</li>
+                            <li><strong>Nexon</strong> is not responsible for product quality, delays, or disputes between buyer and seller.</li>
+                            <li>Buyers must verify product details, seller credibility, and transaction terms before purchasing.</li>
+                            <li>Order can be cancelled only within the first 7 days of placing the order</li>
+                            <li>Platform charges will be clearly displayed during checkout.</li>
+                            <li>Users are responsible for safeguarding their own account credentials and personal information.</li>
+                            <li>Unauthorized activities like fake orders or misuse of platform features will lead to account suspension.</li>
+                            <li>Platform usage signifies acceptance of the Terms of Use and Privacy Policy.</li>
+                        </ul>
+                    </div>
+                    <div class="text-center mt-5">
+                        <button id="agreeBtn" class="px-5 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-md">
+                            Agree and Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const form = document.getElementById('register-form');
+                const modal = document.getElementById('buyerRulesModal');
+                const closeModalBtn = document.getElementById('closeModal');
+                const agreeBtn = document.getElementById('agreeBtn');
+              
+                form.addEventListener('submit', function(event) {
+                  event.preventDefault(); // Stop form from submitting immediately
+                  modal.style.display = 'flex'; // Show Modal
+                });
+              
+                closeModalBtn.onclick = () => {
+                  modal.style.display = 'none';
+                };
+              
+                agreeBtn.onclick = () => {
+                  modal.style.display = 'none';
+                  form.submit(); // Now really submit the form
+                };
+              
+                window.onclick = (event) => {
+                  if (event.target == modal) {
+                    modal.style.display = 'none';
+                  }
+                };
+              </script>
             <%- include('./partials/footer') %>

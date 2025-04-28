@@ -167,6 +167,9 @@
       object-fit: contain;
       background: none;
     }
+    h1{
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -208,6 +211,7 @@
 
 
   <% if(cart.length === 0 ){ %>
+    <br><br><br><br>
     <h1 style="font-size: xx-large;"><b>No items in cart Yet</b></h1>
   <% } else { %>
   <main>
@@ -279,7 +283,7 @@
         </tr>
         <tr>
           <th>Platform Fee</th>
-          <td>₹ 20</td>
+          <td>₹ 2</td>
         </tr>
         <tr>
           <th>Shipping Fee</th>
@@ -287,10 +291,10 @@
         </tr>
         <tr>
           <th>Total Amount</th>
-          <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 20 %></td>
+          <td class="font-semibold text-xl text-green-600">₹ <%= total - totaldiscount + 2 %></td>
         </tr>
       </table>
-      <form action="/pay/<%= total - totaldiscount + 20 %>" method="post">
+      <form action="/pay/<%= total - totaldiscount + 2 %>" method="post">
         <button class="w-full text-xl bg-blue-500 rounded-md mt-4 p-2 text-white">Place Order</button>
       </form>
     </div>

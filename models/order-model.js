@@ -60,7 +60,11 @@ const orderSchema =  mongoose.Schema({
         type:String,
         default:"pending"
     },
-    totalAmount:Number
+    totalAmount:Number,
+    refund:{
+        type:String,
+        default:"not-required"
+    }
 })
 
 module.exports = mongoose.model('order',orderSchema)

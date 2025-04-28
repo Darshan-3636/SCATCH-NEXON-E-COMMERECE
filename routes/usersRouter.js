@@ -6,10 +6,6 @@ const userModel = require('../models/user-model');
 const bcrypt = require('bcrypt');
 const {generateToken} = require('../utils/genrateToken')
 
-router.get('/', (req, res)=>{
-    res.send('heo');
-});
-
 router.post('/register',upload.single('profile'),async (req, res)=>{
     try{
         let {email, password, username, phone , address} = req.body;

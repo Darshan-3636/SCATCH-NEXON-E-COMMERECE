@@ -6,6 +6,7 @@ const productModel = require("../models/product-model");
 const userModel = require("../models/user-model");
 const cartModel = require("../models/cart-model");
 const orderModel = require("../models/order-model");
+const revratModel = require("../models/revrat-model");
 const axios = require("axios");
 const uniqid = require("uniqid");
 const sha256 = require('sha256')
@@ -54,6 +55,7 @@ router.get("/login", function (req, res) {
 
 router.get("/shop", async (req, res) => {
   try {
+    let revrat = await revratModel.find().populate({ path: 'review.userid' ,select: 'username'})
     let error = req.flash("error");
     let success = req.flash("success");
 
@@ -121,7 +123,8 @@ router.get("/shop", async (req, res) => {
       discount,
       error,
       success,
-      loggedin
+      loggedin,
+      revrat
     });
 
   } catch (err) {
@@ -139,6 +142,7 @@ router.get("/cart", isLoggedIn, async (req, res) => {
     .populate("productid").sort({date:-1});
   res.render("cart", { cart, error, success });
 });
+
 
 router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
   try {
@@ -181,7 +185,7 @@ router.get("/orders", isLoggedIn, async (req, res) => {
   res.render("orders", { orders, error, success });
 });
 
-router.post("/addtoorders", isLoggedIn, async (req, res) => {
+router.get("/addtoorders", isLoggedIn, async (req, res) => {
   try {
     let userid = req.user._id;
 
@@ -285,23 +289,45 @@ router.get("/removeorder/:oid", isLoggedIn, async (req, res) => {
     }
 
     // Check if the order has been accepted
-    if (order.orderStatus === "Accepted") {
+    if (order.orderStatus === "completed") {
       req.flash(
         "error",
-        "Order has already been accepted and cannot be cancelled"
+        "Order has already been Completed and cannot be cancelled"
       );
       return res.redirect("/orders");
     }
 
-    // If conditions are met, delete the order
-    await orderModel.deleteOne({ _id: req.params.oid });
-    req.flash("success", "Order Cancelled");
+    // // If conditions are met, delete the order
+    await orderModel.updateOne({ _id: req.params.oid },{refund:"required"},{new:true});
+    req.flash("success", "Order Cancellation requested");
+    return res.redirect("/orders");
   } catch (err) {
     console.error(err);
     req.flash("error", "Something went wrong");
+    return res.redirect("/orders");
   }
 
-  res.redirect("/orders");
+  
+});
+
+router.get("/undocancelorder/:oid", isLoggedIn, async (req, res) => {
+  try {
+    const order = await orderModel.findById(req.params.oid);
+    if (!order) {
+      req.flash("error", "Order not found");
+      return res.redirect("/orders");
+    }
+    // // If conditions are met, delete the order
+    await orderModel.updateOne({ _id: req.params.oid },{refund:"not-required"},{new:true});
+    req.flash("success", "Order Cancellation Revoked");
+    return res.redirect("/orders");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Something went wrong");
+    return res.redirect("/orders");
+  }
+
+  
 });
 
 router.get("/addquantity/:cid", isLoggedIn, async (req, res) => {
@@ -369,6 +395,81 @@ router.get("/removeitem/:cid", isLoggedIn, async (req, res) => {
 
 router.get("/logout", logout);
 
+//details page
+router.post('/details/:id/review', isLoggedIn, async (req, res) => {
+  try {
+      const { rating, comment } = req.body;
+      
+      const newReview = {
+          userid: req.user._id,
+          rating: parseInt(rating),
+          comment
+      };
+
+      await revratModel.findOneAndUpdate(
+          { productid: req.params.id },
+          { $push: { review: newReview } },
+          { upsert: true, new: true }
+      );
+
+      req.flash('success', 'Review submitted!');
+      res.redirect(`/details/${req.params.id}`);
+  } catch (err) {
+      console.error(err);
+      req.flash('error', 'Failed to submit review');
+      res.redirect('back');
+  }
+});
+
+// Update your existing details route (GET)
+router.get('/details/:id', isLoggedIn,async (req, res) => {
+  try {
+    const product = await productModel.findById(req.params.id);
+
+    if (!product) {
+      req.flash('error', 'Product not found');
+      return res.redirect('/shop');
+    }
+
+    // Ensure price and discount are numbers
+    product.price = parseFloat(product.price);
+    product.discount = parseFloat(product.discount || 0);
+
+    // Fetch reviews and populate usernames and pictures
+    const reviewsData = await revratModel
+      .findOne({ productid: req.params.id })
+      .populate('review.userid', 'username picture');
+
+    const reviews = reviewsData?.review || [];
+
+    // Calculate average rating safely
+    let totalRating = 0;
+let totalReviews = reviews.length;
+
+reviews.forEach(review => {
+  totalRating += review.rating// assuming each review has a rating field
+});
+
+let avgRating = totalReviews > 0 ? totalRating / totalReviews : 0
+await productModel.updateOne({_id:req.params.id},{rating:avgRating},{new:true})
+
+
+    
+    res.render('details', {
+      product,
+      reviews,
+      avgRating,
+      loggedin: !!req.cookies.token,
+      user:req.user
+    });
+
+  } catch (err) {
+    console.error(`Details error for product ${req.params.id}:`, err);
+    req.flash('error', 'Failed to load product details');
+    res.redirect('/shop');
+  }
+});
+
 
 //payment gatway
 
@@ -376,7 +477,7 @@ const MERCHANT_ID = 'PGTESTPAYUAT86';
 const PHONE_PE_HOST_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox";
 const SALT_INDEX = 1;
 const SALT_KEY = '96434309-7796-489d-8924-ab56988a6076';
-const APP_BE_URL = "https://nexon-dashboard-78bm.onrender.com"; // our application
+const APP_BE_URL = "http://localhost:4000"; // our application
 
 
 // endpoint to initiate a payment
@@ -488,5 +589,127 @@ router.get("/payment/validate/:merchantTransactionId", async function (req, res)
     res.redirect('/cart')
   }
 });
+
+
+router.get('/buynow/:pid',isLoggedIn ,async (req ,res)=>{
+  // Initiate a payment
+  let product = await productModel.findById(req.params.pid)
+  // Transaction amount
+  const amount = Number(product.price)-Number(product.discount) + 2; 
+  
+
+  // User ID is the ID of the user present in our application DB
+  let userId = `${req.user.email}`;
+
+  // Generate a unique merchant transaction ID for each transaction
+  let merchantTransactionId = uniqid();
+
+  // redirect url => phonePe will redirect the user to this url once payment is completed. It will be a GET request, since redirectMode is "REDIRECT"
+  let normalPayLoad = {
+    merchantId: MERCHANT_ID, //* PHONEPE_MERCHANT_ID . Unique for each account (private)
+    merchantTransactionId: merchantTransactionId,
+    merchantUserId: userId,
+    amount: amount * 100, // converting to paise
+    redirectUrl: `${APP_BE_URL}/buynow/validate/${merchantTransactionId}/${req.params.pid}`,
+    redirectMode: "REDIRECT",
+    mobileNumber: "9999999999",
+    paymentInstrument: {
+      type: "PAY_PAGE",
+    },
+  };
+
+  // make base64 encoded payload
+  let bufferObj = Buffer.from(JSON.stringify(normalPayLoad), "utf8");
+  let base64EncodedPayload = bufferObj.toString("base64");
+
+  // X-VERIFY => SHA256(base64EncodedPayload + "/pg/v1/pay" + SALT_KEY) + ### + SALT_INDEX
+  let string = base64EncodedPayload + "/pg/v1/pay" + SALT_KEY;
+  let sha256_val = sha256(string);
+  let xVerifyChecksum = sha256_val + "###" + SALT_INDEX;
+
+  axios
+    .post(
+      `${PHONE_PE_HOST_URL}/pg/v1/pay`,
+      {
+        request: base64EncodedPayload,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-VERIFY": xVerifyChecksum,
+          accept: "application/json",
+        },
+      }
+    )
+    .then(function (response) {
+      res.redirect(response.data.data.instrumentResponse.redirectInfo.url);
+    })
+    
+    .catch(function (error) {
+      req.flash('error','payment failed')
+      return res.redirect('/shop')
+    });
+})
+
+router.get("/buynow/validate/:merchantTransactionId/:pid", async function (req, res) {
+  const { merchantTransactionId,pid } = req.params;
+  // check the status of the payment using merchantTransactionId
+  if (merchantTransactionId) {
+    let statusUrl =
+      `${PHONE_PE_HOST_URL}/pg/v1/status/${MERCHANT_ID}/` +
+      merchantTransactionId;
+
+    // generate X-VERIFY
+    let string =
+      `/pg/v1/status/${MERCHANT_ID}/` + merchantTransactionId + SALT_KEY;
+    let sha256_val = sha256(string);
+    let xVerifyChecksum = sha256_val + "###" + SALT_INDEX;
+
+    axios
+      .get(statusUrl, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-VERIFY": xVerifyChecksum,
+          "X-MERCHANT-ID": merchantTransactionId,
+          accept: "application/json",
+        },
+      })
+      .then(function (response) {
+        if (response.data && response.data.code === "PAYMENT_SUCCESS") {
+          // redirect to FE payment success status page
+          res.redirect(`/buynow-order/${req.params.pid}`);
+          
+        } else {
+          req.flash('error','payment failed')
+          return res.redirect('/shop')
+        }
+      })
+      .catch(function (error) {
+        req.flash('error',`${error.data}`);
+        return res.redirect('/shop')
+      });
+  } else {
+    req.flash('error',`Somthing Went Wrong`);
+    return res.redirect('/shop')
+  }
+});
+
+router.get('/buynow-order/:pid',isLoggedIn,async (req, res) => {
+  try{
+    let product = await productModel.findById(req.params.pid)
+    await orderModel.create({
+      userid:req.user._id,
+      productid:req.params.pid,
+      totalAmount:Number(product.price) - Number(product.discount) + 2
+    })
+    req.flash('success','Order Placed')
+    return res.redirect('/shop')
+  }
+  catch{
+    req.flash('error','Something Went Wrong')
+    return res.redirect('/shop')
+  }
+  
+})
 
 module.exports = router;
