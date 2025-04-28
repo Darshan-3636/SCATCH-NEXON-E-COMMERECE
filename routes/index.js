@@ -43,28 +43,63 @@ router.post('/account-profile',isLoggedIn ,upload.single('profile'),async (req, 
     }
 })
 
+router.get('/', (req,res)=>{
+  res.redirect('/shop')
+})
+
 router.get("/p", isLoggedIn,async function (req, res) {
   try {
     let revrat = await revratModel.find().populate({ path: 'review.userid' ,select: 'username'})
     let error = req.flash("error");
     let success = req.flash("success");
-
-    
     let query = req.query.q ? req.query.q.trim() : "";
     let sortBy = req.query.sortby || ""; 
-    let category = req.query.category || "all";
-    let availability = req.query.availability || "";
+    let category = req.query.category || "";
+    let availability = req.query.availability || "all";
     let discount = req.query.discount || "";
 
+    
     let filter = {};
+    if (category) {
+      const allowedCategories = [
+        'electronics',
+        'fashion',
+        'home_appliances',
+        'books',
+        'furniture',
+        'beauty_health',
+        'sports',
+        'automotive',
+        'toys_games',
+        'groceries',
+        'stationery',
+        'pet_supplies',
+        'tools_hardware',
+        'musical_instruments',
+        'baby_products',
+        'gardening',
+        'art_crafts',
+        'travel_accessories',
+        'office_supplies',
+        'jewelry_accessories'
+      ];
+    
+      if (allowedCategories.includes(category)) {
+        filter.category = category;
+      }
+    }
 
-    //search //---- done
+    
+  
     if (query) {
       filter.$or = [
         { name: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" } },
       ];
     }
+
+    //search //---- done
+    
 
     // Category filter //done ---
     if (category === "discounted") {
@@ -85,7 +120,7 @@ router.get("/p", isLoggedIn,async function (req, res) {
 
     // Sorting 
 
-    let sorting
+    let sorting;
 
     if(sortBy === "priceLowHigh"){
       sorting = {price:1}
@@ -95,14 +130,12 @@ router.get("/p", isLoggedIn,async function (req, res) {
     // Fetch products with applied filters and sort options
     let products = await productModel.find(filter).sort(sorting);
     
-    let loggedin
-    if(!req.cookies.token === ""){
-      loggedin = 1
-    }
-
-    if(req.cookies.token === ""){
-      loggedin = 0;
-    }
+    
+    
+    let loggedin = 0;
+if (req.cookies.token && req.cookies.token !== "") {
+  loggedin = 1;
+}
 
     res.render("product", {
       products,
@@ -758,16 +791,16 @@ router.get("/buynow/validate/:merchantTransactionId/:pid", async function (req, 
           
         } else {
           req.flash('error','payment failed')
-          return res.redirect('/shop')
+          return res.redirect('/orders')
         }
       })
       .catch(function (error) {
         req.flash('error',`${error.data}`);
-        return res.redirect('/shop')
+        return res.redirect('/orders')
       });
   } else {
     req.flash('error',`Somthing Went Wrong`);
-    return res.redirect('/shop')
+    return res.redirect('/ordders')
   }
 });
 
@@ -780,11 +813,11 @@ router.get('/buynow-order/:pid',isLoggedIn,async (req, res) => {
       totalAmount:Number(product.price) - Number(product.discount) + 2
     })
     req.flash('success','Order Placed')
-    return res.redirect('/shop')
+    return res.redirect('/orders')
   }
   catch{
     req.flash('error','Something Went Wrong')
-    return res.redirect('/shop')
+    return res.redirect('/orders')
   }
   
 })

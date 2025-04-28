@@ -1,4 +1,4 @@
-<%- include('./partials/header') %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -953,13 +953,14 @@ textarea.form-control {
             <%= locals.error %>
         </div>
     <% } %>
+    
 
     <main class="main-content">
         <div class="product-container">
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="main-image-container">
-                    <img src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" 
+                    <img style="max-width: 500px; max-height: 1000px;" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" 
                          alt="<%= product.name %>" 
                          class="main-image"
                          id="mainImage">
@@ -975,6 +976,7 @@ textarea.form-control {
             
             <!-- Product Details -->
             <div class="details">
+              <h1><a href="javascript:history.back();"><b>Go Back</b></a></h1><br>
                 <h1 class="product-title"><%= product.name %></h1>
                 <p class="product-subtitle"><%= product.category || 'Premium Product' %></p>
                 

@@ -303,16 +303,21 @@ input[type="range"]::-moz-range-thumb {
             </div>
   
             <!-- Center Section - Search Bar -->
-            <div class="flex-1 max-w-2xl mx-4 lg:mx-8"">
+            <div class="flex-1 max-w-2xl mx-4 lg:mx-8">
                 <div class="relative">
-                    <input type="text" 
-                           placeholder="Search products..." 
-                           class="w-full px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm">
-                    <button class="absolute right-3 top-2 text-white/80 hover:text-white">
-                        <i class="ri-search-line"></i>
-                    </button>
+                  <form class="relative" action="/p" method="GET">
+                  <input type="text" 
+                        name="q"
+                        placeholder="Search products..." 
+                        value="<%= query || '' %>"
+                        placeholder="Search"
+                        class="w-full px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm">
+                  <button class="absolute right-3 top-2 text-white/80 hover:text-white">
+                    <i class="ri-search-line"></i>
+                  </button>
+                  </form>
                 </div>
-            </div>
+              </div>
 
 
 
@@ -464,7 +469,7 @@ items.forEach(item => {
             <div class="col-md-3">
                 <div class="category-item ch-400">
                     <img src="images/jennie.jpg" />
-                    <a class="category-name" href="">
+                    <a class="category-name" href="http://localhost:4000/p?q=women">
                         <p>Women</p>
                     </a>
                 </div>
@@ -472,13 +477,13 @@ items.forEach(item => {
             <div class="col-md-3">
                 <div class="category-item ch-250">
                     <img src="images/watch.jpg" />
-                    <a class="category-name" href="">
+                    <a class="category-name" href="http://localhost:4000/p?q=watch">
                         <p>Watches</p>
                     </a>
                 </div>
                 <div class="category-item ch-150">
                     <img src="images/shoe2.jpg" />
-                    <a class="category-name" href="">
+                    <a class="category-name" href="http://localhost:4000/p?q=shoe">
                         <p>Shoes</p>
                     </a>
                 </div>
@@ -486,13 +491,13 @@ items.forEach(item => {
             <div class="col-md-3">
                 <div class="category-item ch-150">
                     <img src="images/cent.jpg" />
-                    <a class="category-name" href="">
+                    <a class="category-name" href="http://localhost:4000/p?q=perfume">
                         <p>Perfume</p>
                     </a>
                 </div>
                 <div class="category-item ch-250">
                     <img src="images/sunglass.jpg" />
-                    <a class="category-name" href="">
+                    <a class="category-name" href="http://localhost:4000/p?q=accessories">
                         <p>Accessories</p>
                     </a>
                 </div>
@@ -500,7 +505,7 @@ items.forEach(item => {
             <div class="col-md-3">
                 <div class="category-item ch-400">
                     <img src="images/men2.jpg" />
-                    <a class="category-name" href="">
+                    <a class="category-name" href="http://localhost:4000/p?q=men">
                         <p>Men</p>
                     </a>
                 </div>
@@ -566,8 +571,9 @@ items.forEach(item => {
         <div class="section-header">
             <h1>Featured Product</h1>
         </div>
+        <div class="row g-4">
         <% products.slice(0,4).forEach(function (product){ %>
-            <div class="row g-4">
+            
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <div class="product-item">
                         <div class="product-title">
@@ -576,7 +582,6 @@ items.forEach(item => {
                                 <% for(let i = 0; i < Math.round(product.rating) ; i++) { %>
                                     <i class="fa fa-star"></i>
                                 <% } %> <%= " " + product.rating.toFixed(2) %>
-                                
                             </div>
                         </div>
                         <div class="product-image">
@@ -592,16 +597,17 @@ items.forEach(item => {
                         </div>
                     </div>
                 </div>
-            </div>
+            
         <% })%>
-        
-            <!-- Repeat for each product -->
+    </div>
+            <!-- Repeat for each product
             
 
-            <!-- Continue for other products... -->
+            Continue for other products... -->
         
     </div>
 </div>
+
 <!-- Featured Product End -->
 
 <!-- Featured Product End -->

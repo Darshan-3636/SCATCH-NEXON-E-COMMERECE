@@ -26,7 +26,10 @@ const productSchema = mongoose.Schema({
     },
     stock:Number,
     description:String,
-    rating:Number
+    rating:{
+        type:Number,
+        default:0
+    }
 })
 
 module.exports = mongoose.model("product",productSchema)
