@@ -43,8 +43,85 @@ router.post('/account-profile',isLoggedIn ,upload.single('profile'),async (req, 
     }
 })
 
-router.get("/", function (req, res) {
-  res.redirect('/shop');
+router.get("/p", isLoggedIn,async function (req, res) {
+  try {
+    let revrat = await revratModel.find().populate({ path: 'review.userid' ,select: 'username'})
+    let error = req.flash("error");
+    let success = req.flash("success");
+
+    
+    let query = req.query.q ? req.query.q.trim() : "";
+    let sortBy = req.query.sortby || ""; 
+    let category = req.query.category || "all";
+    let availability = req.query.availability || "";
+    let discount = req.query.discount || "";
+
+    let filter = {};
+
+    //search //---- done
+    if (query) {
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+      ];
+    }
+
+    // Category filter //done ---
+    if (category === "discounted") {
+        filter.discount = { $gt: 0 }; // Ensures discount is greater than 0
+    }
+
+    //  Availability filter //----done
+    if (availability === "inStock") {
+      filter.stock = { $gt: 0 }; // Products with stock > 0
+    } else if (availability === "outOfStock") {
+      filter.stock = 0; // Products with no stock
+    }
+
+    // Discount 
+    if (discount === "true") {
+      filter.discount = { $gt: 0 }; // Ensures discount is greater than 0
+    }
+
+    // Sorting 
+
+    let sorting
+
+    if(sortBy === "priceLowHigh"){
+      sorting = {price:1}
+    } else if (sortBy === "priceHighLow"){
+      sorting = {price:-1}
+    }
+    // Fetch products with applied filters and sort options
+    let products = await productModel.find(filter).sort(sorting);
+    
+    let loggedin
+    if(!req.cookies.token === ""){
+      loggedin = 1
+    }
+
+    if(req.cookies.token === ""){
+      loggedin = 0;
+    }
+
+    res.render("product", {
+      products,
+      query,
+      sortBy,
+      category,
+      availability,
+      discount,
+      error,
+      success,
+      loggedin,
+      revrat
+    });
+
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Error loading products!");
+    res.redirect("/");
+  }
 });
 
 router.get("/login", function (req, res) {
