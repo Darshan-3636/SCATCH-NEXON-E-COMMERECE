@@ -383,60 +383,71 @@
   }
   </style>
 </head>
-<body class="font-['helvetica_now_display']">
-  <header class="main-header">
-    <nav class="nav-container">
+<header class="main-header">
+  <nav class="nav-container">
       <div class="flex items-center justify-between h-16 gap-100">
-        <!-- Left Section - Logo and Navigation -->
-        <div class="flex items-center gap-12 flex-shrink-0">
-          <!-- Logo -->
-          <h1 style="color: white; font-weight: bold; font-size: 2.5rem; margin-left: 40px;">NEXON</h1>
-
-          <!-- Navigation Links -->
-      
-        </div>
-
-        <!-- Center Section - Search Bar -->
-        <div class="flex-1 max-w-2xl mx-4 lg:mx-8">
-          <div class="relative">
-            <form class="relative" action="/p" method="GET">
-            <input type="text" 
-                  name="q"
-                  placeholder="Search products..." 
-                  value="<%= query || '' %>"
-                  placeholder="Search"
-                  class="w-full px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm">
-            <button class="absolute right-3 top-2 text-white/80 hover:text-white">
-              <i class="ri-search-line"></i>
-            </button>
-            </form>
+          <!-- Left Section - Logo and Navigation -->
+          <div class="flex items-center gap-12 flex-shrink-0">
+              <!-- Logo -->
+              <h1 style="color: white; font-weight: bold; font-size: 2.5rem; margin-left: 40px;">NEXON</h1>
           </div>
-        </div>
-     
 
-        <!-- Right Section - Icons -->
-       
+          <!-- Center Section - Search Bar -->
+          <div class="flex-1 max-w-2xl mx-4 lg:mx-8">
+              <div class="relative">
+                <form class="relative" action="/p" method="GET">
+                <input type="text" 
+                      name="q"
+                      placeholder="Search products..." 
+                      value="<%= query || '' %>"
+                      placeholder="Search"
+                      class="w-full px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm">
+                <button class="absolute right-3 top-2 text-white/80 hover:text-white">
+                  <i class="ri-search-line"></i>
+                </button>
+                </form>
+              </div>
+            </div>
 
-        <div class="nav-links hidden lg:flex items-center gap-6 text-gray-700 font-semibold text-base">
-          <!-- Wishlist -->
-          <div class="flex space-x-6">
-            <a href="/shop" class="hover:underline hover:text-indigo-600 transition-colors">Home</a>
-            <a href="/orders" class="hover:underline hover:text-indigo-600 transition-colors">Orders</a>
-            <a href="/cart" class="hover:underline hover:text-indigo-600 transition-colors">Cart</a>
-            <a href="/account" class="hover:underline hover:text-indigo-600 transition-colors">My Account</a>
-            <% if(loggedin === 0){ %>
-              <a href="/login" class="hover:underline hover:text-indigo-600 transition-colors">Login</a>
-            <% } %>
-            <% if(loggedin === 1){ %>
-              <a href="/logout" class="text-red-500 hover:underline hover:text-red-600 transition-colors">Logout</a>
-            <% } %>
-          </div>
-        </div>
-        
-                
+         <!-- Right Section - Icons -->
+<!-- Right Section - Colorful Icons Navbar -->
+ <div class="icons">
+<div class="flex items-center gap-6 ml-auto">
+
+  <!-- Home -->
+  <a href="/shop" class="p-2 text-blue-500 hover:text-blue-700 transition-all duration-300">
+    <i class="ri-home-line text-2xl"></i>
+  </a>
+
+  <!-- Cart -->
+  <a href="/cart" class="p-2 text-green-500 hover:text-green-700 transition-all duration-300 relative">
+    <i class="ri-shopping-cart-line text-2xl"></i>
+    <!-- Example cart badge (optional) -->
+    <!-- <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">3</span> -->
+  </a>
+
+  <!-- Orders -->
+  <a href="/orders" class="p-2 text-purple-500 hover:text-purple-700 transition-all duration-300">
+    <i class="ri-file-list-line text-2xl"></i>
+  </a>
+
+  <!-- Products -->
+  <a href="/p" class="p-2 text-yellow-500 hover:text-yellow-700 transition-all duration-300">
+    <i class="ri-box-3-line text-2xl"></i>
+  </a>
+
+  <!-- User Account -->
+  <a href="/account" class="p-2 text-indigo-500 hover:text-indigo-700 transition-all duration-300">
+    <i class="ri-user-line text-2xl"></i>
+  </a>
+
+</div>
+</div>
+
+
       </div>
-    </nav>
-  </header>
+  </nav>
+</header>
 
   <!-- Sidebar Toggle Button -->
   <button class="sidebar-toggle" id="sidebarToggle">

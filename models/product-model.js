@@ -26,6 +26,8 @@ const productSchema = mongoose.Schema({
     },
     stock:Number,
     description:String,
+    category:String,
+    rating:Number,
     rating:{
         type:Number,
         default:0

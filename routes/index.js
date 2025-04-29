@@ -266,7 +266,7 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
         if (cartItem) {
           if(cartItem.quantity === product.stock){
             req.flash("error", `Only ${product.stock} available`);
-            return res.redirect("/shop");
+            return res.redirect("/p");
           }
           cartItem.quantity += 1;
           await cartItem.save();
@@ -274,15 +274,15 @@ router.get("/addtocart/:pid", isLoggedIn, async (req, res) => {
           await cartModel.create({ userid, productid: pid});
         }
         req.flash("success", "Product added to your cart!");
-        return res.redirect("/shop"); 
+        return res.redirect("/p"); 
     } else {
       req.flash("error", "Product Out Of Stock");
-      return res.redirect("/shop");
+      return res.redirect("/p");
     }
   } catch (error) {
     console.error(error);
     req.flash("error", "Something Went Wrong");
-    res.redirect("/shop");
+    res.redirect("/p");
   }
 });
 
@@ -295,7 +295,7 @@ router.get("/orders", isLoggedIn, async (req, res) => {
   res.render("orders", { orders, error, success });
 });
 
-router.get("/addtoorders", isLoggedIn, async (req, res) => {
+router.post("/addtoorders", isLoggedIn, async (req, res) => {
   try {
     let userid = req.user._id;
 
@@ -494,11 +494,11 @@ router.get("/removeitem/:cid", isLoggedIn, async (req, res) => {
       req.flash("success", "Item Removed From Cart");
       return res.redirect("/cart");
     } else {
-      req.flash("error", "Something went Wrong");
+      req.flash("error", "Something Went Wrong");
       res.redirect("/cart");
     }
   } catch (err) {
-    req.flash("error", "Something went Wrong");
+    req.flash("error", "Something Went Wrong");
     res.redirect("/cart");
   }
 });
@@ -800,7 +800,7 @@ router.get("/buynow/validate/:merchantTransactionId/:pid", async function (req, 
       });
   } else {
     req.flash('error',`Somthing Went Wrong`);
-    return res.redirect('/ordders')
+    return res.redirect('/orders')
   }
 });
 

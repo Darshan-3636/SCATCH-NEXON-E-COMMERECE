@@ -7,32 +7,78 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .flash-message {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9999;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    .fixed-sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+
+    .sidebar-toggle:hover {
+        background: #25283B;
+        transform: scale(1.05);
+    }
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .fixed-sidebar {
+            width: 260px;
+        }
+        .main-content {
+            margin-left: 0;
+            padding: 5rem 1rem 1rem;
+        }
+        .sidebar-toggle {
+            display: block !important;
+        }
     }
 
 
-    .flash-success {
-      font-family: 'Helvetica', 'Arial', sans-serif;
-      background-color: #4caf50;
-      color: #fff;
-    }
+    /* Price Range Customization */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
 
-    .flash-error {
-      font-family: 'Helvetica', 'Arial', sans-serif;
-      background-color: #f44336;
-      color: #fff;
-    }
-    .main-content {
-    background-color: #D2D2D2;
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #25283B;
+    border-radius: 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    background: #25283B;
+    border-radius: 50%;
+    margin-top: -6px;
+    cursor: pointer;
+    border: none;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: #25283B;
+    border-radius: 4px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    background: #25283B;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+.icons{
+    margin-right: 10px;
+    background-color:#25283B ;
+}
+.main-content {
+    /* background-color: #D2D2D2; */
     }
     .main-header {
         background: #25283B;
@@ -51,15 +97,6 @@
         margin-top: 10px;
         margin-left: 20px;
         padding: 0 2rem;
-    }
-
-    /* Search Bar Transitions */
-    input::placeholder {
-        transition: opacity 0.2s ease;
-    }
-
-    input:focus::placeholder {
-        opacity: 0.5;
     }
     
 
@@ -87,11 +124,11 @@
 
     .brand, a{
       font-family: 'Helvetica', 'Arial', sans-serif;
-      background-color: #f9f9f9;
+      /* background-color: #f9f9f9; */
     }
     body {
       font-family: 'Helvetica', 'Arial', sans-serif;
-      background-color: #f9f9f9;
+      /* background-color: #f9f9f9; */
     }
     main {
       
@@ -150,59 +187,79 @@
     h1{
       text-align: center;
     }
-  </style></head>
 
-<body>
-  <header class="main-header">
-    <nav class="nav-container">
-      <div class="flex items-center justify-between h-16 gap-100">
-        <div class="flex items-center gap-12 flex-shrink-0">
-          <h1 style="color: white; font-weight: bold; font-size: 2.5rem; margin-left: 40px;">NEXON</h1>
-          <div class="nav-links hidden lg:flex items-center gap-6">
-            <a class="b" style="color: white;" href="/shop" class="hover:underline">Home</a>
-            <a class="a" style="color: white;" href="/cart" class="hover:underline">Cart</a>
-            
-            <a class="a" style="color: white;" href="/account" class="hover:underline">My account</a>
-          </div>
-        </div>
-        <div class="flex-1 max-w-2xl mx-4 lg:mx-8">
-          <div class="relative">
-            
-         
-    </nav>
-  </header><br><br>
+</style>
+<link rel="stylesheet" href="/stylesheets/cards.css">
 </head>
 <body class="font-['helvetica_now_display']">
+<% if (error.length > 0) { %>
+    <div class="flash-message flash-error">
+      <%= error %>
+    </div>
+  <% } %>
   
-    <% var loggedin = typeof loggedin !== "undefined" ? loggedin:true %>
-    <% if(loggedin){ %>
-        <!-- Navbar -->
-  <nav class="w-full fixed top-0 left-0 px-5 py-5 flex justify-between items-center border-b-2 border-gray-300 bg-white/60 backdrop-blur-md">
-    <!-- Left side (Brand Name) -->
-    <h3 class="text-xl font-bold">NEXON</h3>
-          <!-- Center: Search Bar -->
-    <div class="flex-1 mx-10">
-        <form class="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            class="w-full border border-gray-300 rounded-full py-2 pl-10 pr-4 focus:outline-none bg-white/70"
-          />
-          <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-        </form>
-      </div>
-      
-      <!-- Right side (Navigation Links) -->
-      <div class="flex space-x-6 text-[16px] font-medium">
-        <a href="/shop" class="hover:underline">Home</a>
-        <a href="/orders" class="hover:underline">orders</a>
-        <a href="/cart" class="hover:underline">Cart</a>
-        <a href="/account" class="hover:underline">My account</a>
-        <a href="/logout" class="text-red-600 hover:underline">Logout</a>
-      </div>
+  <% if (success.length > 0) { %>
+    <div class="flash-message flash-success">
+      <%= success %> 
+    </div>
+  <% } %>
+
+<header class="main-header">
+    <nav class="nav-container">
+        <div class="flex items-center justify-between h-16 gap-100">
+            <!-- Left Section - Logo and Navigation -->
+            <div class="flex items-center gap-12 flex-shrink-0">
+                <!-- Logo -->
+                <h1 style="color: white; font-weight: bold; font-size: 2.5rem; margin-left: 40px;">NEXON</h1>
+            </div>
+  
+            <!-- Center Section - Search Bar -->
+            <div class="flex-1 max-w-2xl mx-4 lg:mx-8">
+                <div class="relative">
+                  <!--  -->
+                </div>
+              </div>
+
+           <!-- Right Section - Icons -->
+  <!-- Right Section - Colorful Icons Navbar -->
+   <div class="icons">
+<div class="flex items-center gap-6 ml-auto">
+  
+    <!-- Home -->
+    <a href="/shop" class="p-2 text-blue-500 hover:text-blue-700 transition-all duration-300">
+      <i class="ri-home-line text-2xl"></i>
+    </a>
+  
+    <!-- Cart -->
+    <a href="/cart" class="p-2 text-green-500 hover:text-green-700 transition-all duration-300 relative">
+      <i class="ri-shopping-cart-line text-2xl"></i>
+      <!-- Example cart badge (optional) -->
+      <!-- <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">3</span> -->
+    </a>
+  
+    <!-- Orders -->
+    <a href="/orders" class="p-2 text-purple-500 hover:text-purple-700 transition-all duration-300">
+      <i class="ri-file-list-line text-2xl"></i>
+    </a>
+  
+    <!-- Products -->
+    <a href="/p" class="p-2 text-yellow-500 hover:text-yellow-700 transition-all duration-300">
+      <i class="ri-box-3-line text-2xl"></i>
+    </a>
+  
+    <!-- User Account --> 
+    <a href="/account" class="p-2 text-indigo-500 hover:text-indigo-700 transition-all duration-300">
+      <i class="ri-user-line text-2xl"></i>
+    </a>
+  
+  </div>
+</div>
+  
+  
+        </div>
     </nav>
-    <br>
-    <% }%>
+  </header> 
+</body>
   <br><br><br>
 
 
@@ -221,8 +278,10 @@
     </div>
     <% } %>
 
+
   <% if(orders.length === 0 ){ %>
-    <h1 style="font-size: xx-large;"><b>No Orders Yet</b></h1>
+    <br><br><br>
+    <h1 style="font-size: xx-large;text-align: center; "><b>No Orders Yet</b></h1>
   <% } else { %>
   <main>
     <div class="users-section">

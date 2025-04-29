@@ -262,6 +262,9 @@ input[type="range"]::-moz-range-thumb {
     border: none;
     cursor: pointer;
 }
+.icons{
+    margin-right: 10px;
+}
 
 </style>
 <link rel="stylesheet" href="/stylesheets/cards.css">
@@ -286,20 +289,6 @@ input[type="range"]::-moz-range-thumb {
             <div class="flex items-center gap-12 flex-shrink-0">
                 <!-- Logo -->
                 <h1 style="color: white; font-weight: bold; font-size: 2.5rem; margin-left: 40px;">NEXON</h1>
-  
-                <!-- Navigation Links -->
-                <div class="nav-links hidden lg:flex items-center gap-6">
-                        <a style="color: white;" href="/shop" class="hover:underline">Home</a>
-                        <a style="color: white;" href="/orders" class="hover:underline">orders</a>
-                        <a style="color: white;"href="/cart" class="hover:underline">Cart</a>
-                        <a style="color: white;" href="/account" class="hover:underline">My account</a>
-                        <% if(loggedin === 0){ %>
-                            <a style="color: white;" href="/login" class="hover:underline">Login</a>
-                        <% } %>
-                        <% if(loggedin === 1){ %>
-                            <a style="color: white;" href="/logout" class="text-red-600 hover:underline">Logout</a>
-                        <% } %>
-                </div>
             </div>
   
             <!-- Center Section - Search Bar -->
@@ -319,49 +308,47 @@ input[type="range"]::-moz-range-thumb {
                 </div>
               </div>
 
-
-
-
-
-
-
-
            <!-- Right Section - Icons -->
-  <div class="flex items-center gap-4 flex-shrink-0 ml-auto">
-      <!-- Wishlist -->
-      <a href="/wishlist" class="p-2 text-white/80 hover:text-white relative">
-          <i class="ri-heart-line text-xl"></i>
-          <span class="absolute -top-1 -right-1 bg-red-500 text-xs text-white w-5 h-5 rounded-full flex items-center justify-center">3</span>
-      </a>
+  <!-- Right Section - Colorful Icons Navbar -->
+   <div class="icons">
+<div class="flex items-center gap-6 ml-auto">
   
-      <!-- Cart -->
-      <a href="/cart" class="p-2 text-white/80 hover:text-white relative">
-          <i class="ri-shopping-cart-line text-xl"></i>
-          <span class="absolute -top-1 -right-1 bg-blue-500 text-xs text-white w-5 h-5 rounded-full flex items-center justify-center">5</span>
-      </a>
+    <!-- Home -->
+    <a href="/shop" class="p-2 text-blue-500 hover:text-blue-700 transition-all duration-300">
+      <i class="ri-home-line text-2xl"></i>
+    </a>
   
-      <!-- User Account Dropdown -->
-      <div class="relative group">
-          <button class="flex items-center gap-2 text-white/80 hover:text-white">
-              <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <i class="ri-user-line"></i>
-              </div>
-          </button>
+    <!-- Cart -->
+    <a href="/cart" class="p-2 text-green-500 hover:text-green-700 transition-all duration-300 relative">
+      <i class="ri-shopping-cart-line text-2xl"></i>
+      <!-- Example cart badge (optional) -->
+      <!-- <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">3</span> -->
+    </a>
   
-          <!-- Dropdown Menu -->
-          <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl py-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
-              <a href="/profile" class="px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center gap-2 text-sm">
-                  <i class="ri-user-line"></i> Profile
-              </a>
-              <a href="/orders" class="px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center gap-2 text-sm">
-                  <i class="ri-list-check"></i> Orders
-              </a>
-              <a href="/logout" class="px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center gap-2 text-sm">
-                  <i class="ri-logout-box-r-line"></i> Logout
-              </a>
-          </div>
-      </div>
+    <!-- Orders -->
+    <a href="/orders" class="p-2 text-purple-500 hover:text-purple-700 transition-all duration-300">
+      <i class="ri-file-list-line text-2xl"></i>
+    </a>
+  
+    <!-- Products -->
+    <a href="/p" class="p-2 text-yellow-500 hover:text-yellow-700 transition-all duration-300">
+      <i class="ri-box-3-line text-2xl"></i>
+    </a>
+  
+    <!-- User Account -->
+    <a href="/account" class="p-2 text-indigo-500 hover:text-indigo-700 transition-all duration-300">
+      <i class="ri-user-line text-2xl"></i>
+    </a>
+
+    <!-- Logout -->
+<a href="/logout" class="p-2 text-rose-500 hover:text-rose-700 transition-all duration-300">
+    <i class="ri-logout-box-r-line text-2xl"></i>
+  </a>
+  
+  
   </div>
+</div>
+  
   
         </div>
     </nav>
@@ -505,7 +492,7 @@ items.forEach(item => {
             <div class="col-md-3">
                 <div class="category-item ch-400">
                     <img src="images/men2.jpg" />
-                    <a class="category-name" href="http://localhost:4000/p?q=men">
+                    <a class="category-name" href="http://localhost:4000/p?q=man">
                         <p>Men</p>
                     </a>
                 </div>
@@ -904,3 +891,20 @@ items.forEach(item => {
 
 <!-- Back to Top -->
 <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+<script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Select all flash messages
+      var flashMessages = document.querySelectorAll('.flash-message');
+  
+      // Iterate through each flash message
+      flashMessages.forEach(function(message) {
+        // Set a timeout to remove the message after 5 seconds (5000 milliseconds)
+        setTimeout(function() {
+          message.style.display = 'none';
+        }, 5000);
+      });
+    });
+  </script>
+</body>
+</html>
